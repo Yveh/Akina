@@ -1,0 +1,5 @@
+#cover{
+    background-image: url(/static/img/bg.jpeg);
+    background-size: cover;
+    background-attachment: scroll;
+}
