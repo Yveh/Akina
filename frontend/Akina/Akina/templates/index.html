@@ -14,33 +14,40 @@
 
 <body>
     <header>
-        <nav class="navbar navbar-default navbar-static-top">
+        <nav class="navbar navbar-expand-md bg-light navbar-light">
             <div class="container">
-                <div class="collapse navbar-collapse" id="LoginSlider">
-                    <form role="form" action="/login" method="post">
-                        <div class="form-group">
-                            <label for="Username:">Username</label>
-                            <input type="text" class="form-control" name="Username" placeholder="Enter username">
-                        </div>
-                        <div class="form-group">
-                            <label for="Password:">Password</label>
-                            <input type="text" class="form-control" name="Password" placeholder="Enter password">
-                        </div>
-                        <button type="submit" class="btn btn-outline-danger">给老子登陆！</button>
-                    </form>
-                </div>
+                <a class="navbar-brand" href="#">
+                    <h1>Logo</h1>
+                </a>
+                <button type="button" class="btn-primary" data-toggle="collapse" data-target="#LoginSlider">
+                    <h1>给我登录！</h1>
+                </button>
             </div>
         </nav>
     </header>
-    <section id="cover">
-        <div class="container-fluid">
-            <button type="button" class="btrimary" data-toggle="collapse" data-target="#LoginSlider">Login</button>
-            <div class="row">
-                <div class="col">
-                    <h1 class="display-1 text-center">Akina</h1>
-                </div>
+    <section class="container collapse" id="LoginSlider">
+        <form role="form" action="/login" method="post">
+            <div class="form-group">
+                <label for="Username:">Username</label>
+                <input type="text" class="form-control" name="Username" placeholder="Enter username">
             </div>
+            <div class="form-group">
+                <label for="Password:">Password</label>
+                <input type="text" class="form-control" name="Password" placeholder="Enter password">
+            </div>
+            <button type="submit" class="btn btn-outline-danger">登，都可以登</button>
+        </form>
+    </section>
+    <section id="cover">
+        <div class="container">
+            <div class="card text-center">
+                <h1>TTRS</h1>
+            </div>
+            <a href="#services" class="scrollto"><i class="fa fa-angle-down" aria-hidden="true"></i></a>
         </div>
+    </section>
+    <section>
+        
     </section>
 </body>
 

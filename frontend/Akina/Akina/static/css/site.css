@@ -1,5 +1,17 @@
+#LoginSlider{
+    padding: 15px;
+}
 #cover{
     background-image: url(/static/img/bg.jpeg);
     background-size: cover;
     background-attachment: scroll;
+    padding-top :1px;
+    padding-bottom: 1px;
+}
+.card{
+    width: 360px;
+    height: 465px;
+    margin: 300px auto;
+    background-color: #fff;
+    padding: 70px 60px;
 }
