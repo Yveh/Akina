@@ -1,17 +1,38 @@
-#LoginSlider{
-    padding: 15px;
+:root {
+    --login-register-form-group-input-padding: .75rem;
 }
-#cover{
-    background-image: url(/static/img/bg.jpeg);
-    background-size: cover;
-    background-attachment: scroll;
-    padding-top :1px;
-    padding-bottom: 1px;
+
+.login-register-form-group {
+    position: relative;
 }
-.card{
-    width: 360px;
-    height: 465px;
-    margin: 300px auto;
-    background-color: #fff;
-    padding: 70px 60px;
+
+.login-register-form-group>input {
+    padding: var(--login-register-form-group-input-padding);
+}
+
+.login-register-form-group>label {
+    padding: var(--login-register-form-group-input-padding);
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+    width: 100%;
+    margin-bottom: 0;
+    line-height: 1.5;
+    color: #495057;
+    border: 1px solid transparent;
+    border-radius: .25rem;
+    transition: all .1s ease-in-out;
+}
+
+.login-register-form-group input:not(:placeholder-shown) {
+    padding-top: calc(var(--login-register-form-group-input-padding) + var(--login-register-form-group-input-padding) * (2 / 3));
+    padding-bottom: calc(var(--login-register-form-group-input-padding) / 3);
+}
+
+.login-register-form-group input:not(:placeholder-shown)~label {
+    padding-top: calc(var(--login-register-form-group-input-padding) / 3);
+    padding-bottom: calc(var(--login-register-form-group-input-padding) / 3);
+    font-size: 12px;
+    color: #777;
 }

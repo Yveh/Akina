@@ -14,41 +14,50 @@
 
 <body>
     <header>
-        <nav class="navbar navbar-expand-md bg-light navbar-light">
+        <div class="collapse bg-light py-4" id="navbarHeader">
             <div class="container">
-                <a class="navbar-brand" href="#">
-                    <h1>Logo</h1>
+                <form>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group login-register-form-group">
+                                <input type="email" class="form-control" placeholder="Email address" id="inputEmail" required>
+                                <label for="inputEmail">Email address</label>
+                            </div>
+                            <div class="form-group login-register-form-group">
+                                <input type="password" class="form-control" placeholder="Password" id="inputPassword" required>
+                                <label for="inputPassword">Password</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-2">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" value="remember-me"> Remember me
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-3 offset-7">
+                            <a href="#">No account?Click here to register</a>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="navbar navbar-light bg-light box-shadow">
+            <div class="container d-flex justfy-content-between">
+                <a href="#" class="navbar-brand d-flex align-items-center">
+                    <strong>Akina</strong>
                 </a>
-                <button type="button" class="btn-primary" data-toggle="collapse" data-target="#LoginSlider">
-                    <h1>给我登录！</h1>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarHeader">
+                    <span class="navbar-toggler-icon"></span>
                 </button>
             </div>
-        </nav>
-    </header>
-    <section class="container collapse" id="LoginSlider">
-        <form role="form" action="/login" method="post">
-            <div class="form-group">
-                <label for="Username:">Username</label>
-                <input type="text" class="form-control" name="Username" placeholder="Enter username">
-            </div>
-            <div class="form-group">
-                <label for="Password:">Password</label>
-                <input type="text" class="form-control" name="Password" placeholder="Enter password">
-            </div>
-            <button type="submit" class="btn btn-outline-danger">登，都可以登</button>
-        </form>
-    </section>
-    <section id="cover">
-        <div class="container">
-            <div class="card text-center">
-                <h1>TTRS</h1>
-            </div>
-            <a href="#services" class="scrollto"><i class="fa fa-angle-down" aria-hidden="true"></i></a>
         </div>
-    </section>
-    <section>
-        
-    </section>
+    </header>
 </body>
 
 </html>
