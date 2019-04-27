@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Akina</title>
+    <link href="/static/css/bootstrap.css" rel="stylesheet">
+    <link href="/static/css/index.css" rel="stylesheet">
+    <script src="/static/js/jquery.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
+</head>
+
+<body>
+    <div id="cover" class="d-flex align-items-center">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div id="login-box" class="col-4 px-0">
+                    <div id="title-box" class="my-4">
+                        <div class="row">
+                            <div class="col">
+                                <h1 id="title" class="text-center">Akina</h1>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="form-box" class="col py-4">
+                        <div class="row">
+                            <div class="col">
+                                <ul class="nav nav-tabs nav-fill justify-content-center mb-3">
+                                    <li class="nav-item">
+                                        <a class="nav-link active" data-toggle="tab" href="#login-form">Sign in</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" data-toggle="tab" href="#register-form">Sign up</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="login-form">
+                                <form action="index/" method="POST">
+                                    {{ csrf_input }}
+                                    <div class="row">
+                                        <div class="col">
+                                            <div class="form-group">
+                                                <input type="email" name="email" class="form-control" placeholder="Email address" id="inputEmail" required>
+                                                <label for="inputEmail">Email address</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <div class="form-group">
+                                                <input type="password" name="password" class="form-control" placeholder="Password" id="inputPassword" required>
+                                                <label for="inputPassword">Password</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <div class="checkbox">
+                                                <label>
+                                            <input type="checkbox" name="remember me"> Remember me
+                                        </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <input name="type" value="Sign in" class="btn btn-lg btn-primary btn-block" type="submit">
+                                        </div>
+                                    </div>
+
+                                </form>
+                            </div>
+                            <div class="tab-pane" id="register-form">
+                                <form action="index/" method="POST">
+                                    {{ csrf_input }}
+                                    <div class="row">
+                                        <div class="col">
+                                            <div class="form-group">
+                                                <input type="email" name="email" class="form-control" placeholder="Email address" id="inputEmailR" required>
+                                                <label for="inputEmailR">Email address</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <div class="form-group">
+                                                <input type="password" name="password" class="form-control" placeholder="Password" id="inputPasswordR" required>
+                                                <label for="inputPasswordR">Password</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <div class="form-group">
+                                                <input type="text" name="username" class="form-control" placeholder="Username" id="inputUsername" required>
+                                                <label for="inputUsername">Username</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <div class="form-group">
+                                                <input type="text" name="phone" class="form-control" placeholder="Phone" id="inputPhone" required>
+                                                <label for="inputPhone">Phone</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <input name="type" value="Sign up" class="btn btn-lg btn-primary btn-block" type="submit">
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
