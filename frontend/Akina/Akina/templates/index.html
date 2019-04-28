@@ -7,116 +7,52 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Akina</title>
     <link href="/static/css/bootstrap.css" rel="stylesheet">
-    <link href="/static/css/site.css" rel="stylesheet">
+    <link href="/static/css/index.css" rel="stylesheet">
     <script src="/static/js/jquery.js"></script>
     <script src="/static/js/bootstrap.js"></script>
 </head>
 
 <body>
     <header>
-        <div class="collapse bg-light py-4" id="navbarHeader">
+        <div id="navbarHeader" class="collapse py-4">
             <div class="container">
-                <form>
+                <form action="index/" method="POST">
+                    {{ csrf_input }}
                     <div class="row">
                         <div class="col">
-                            <div class="form-group login-register-form-group">
-                                <input type="email" class="form-control" placeholder="Email address" id="inputEmail"
-                                    required>
+                            <div class="form-group">
+                                <input type="email" name="email" class="form-control" placeholder="Email address" id="inputEmail" required>
                                 <label for="inputEmail">Email address</label>
                             </div>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col">
-                            <div class="form-group login-register-form-group">
-                                <input type="password" class="form-control" placeholder="Password" id="inputPassword"
-                                    required>
+                            <div class="form-group">
+                                <input type="password" name="password" class="form-control" placeholder="Password" id="inputPassword" required>
                                 <label for="inputPassword">Password</label>
                             </div>
                         </div>
                     </div>
-<<<<<<< HEAD
-                    <div class="row">
+                    <div class="row justfy-content-between">
                         <div class="col">
                             <div class="checkbox">
-                                <input type="checkbox" name="remember me" value="1"> Remember me
+                                <input type="checkbox" name="remember me"> <label class="text-light">Remember me</label>
                             </div>
                         </div>
-                        <div class="col">
-                            <a href="#">No account?Click here to register</a>
+                        <div class="col text-right">
+                            <a href="/" class="text-light">No account?Click here to register</a>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col">
-                            <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
-=======
-                    <div class="collapse login-register-collapse">
-                        <div class="row">
-                            <div class="col">
-                                <div class="form-group login-register-form-group">
-                                    <input type="text" class="form-control" placeholder="Username" id="inputUsername"
-                                        required>
-                                    <label for="inputUsername">Username</label>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col">
-                                <div class="form-group login-register-form-group">
-                                    <input type="text" class="form-control" placeholder="Phone" id="inputPhone"
-                                        required>
-                                    <label for="inputPhone">Phone</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="collapse login-register-collapse show">
-                        <div class="row">
-                            <div class="col">
-                                <label for="remember-me-checkbox">Remember me</label>
-                                <input type="checkbox" value="remember-me">
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col">
-                                <label for="login-collapse-button">Click arrow to register</label>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-6">
-                                <div class="btn-group dropdown">
-                                    <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
-                                    <button type="button" id="login-collapse-button"
-                                        class="btn btn-primary dropdown-toggle dropdown-toggle-split"
-                                        data-toggle="collapse" data-target=".login-register-collapse">
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="collapse login-register-collapse">
-                        <div class="row">
-                            <div class="col">
-                                <label for="register-collapse-button">Click arrow to login</label>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col">
-                                <div class="btn-group dropup">
-                                    <button class="btn btn-lg btn-primary btn-block" type="submit">Sign up</button>
-                                    <button type="button" id="register-collapse-button"
-                                        class="btn btn-primary dropdown-toggle dropdown-toggle-split"
-                                        data-toggle="collapse" data-target=".login-register-collapse">
-                                    </button>
-                                </div>
-                            </div>
->>>>>>> 13ee3ca8520ba189f2419bdefebb76188592533a
+                            <input name="type" value="Sign in" class="btn btn-lg btn-primary btn-block" type="submit">
                         </div>
                     </div>
                 </form>
             </div>
         </div>
-        <div class="navbar navbar-light bg-light box-shadow">
+        <div id="navbar" class="navbar navbar-dark bg-dark box-shadow">
             <div class="container d-flex justfy-content-between">
                 <a href="#" class="navbar-brand d-flex align-items-center">
                     <strong>Akina</strong>
