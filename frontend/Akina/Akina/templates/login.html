@@ -39,7 +39,7 @@
                         </div>
                         <div class="tab-content">
                             <div class="tab-pane active" id="login-form">
-                                <form action="index/" method="POST">
+                                <form action="/index/" method="POST">
                                     {{ csrf_input }}
                                     <div class="row">
                                         <div class="col">
@@ -59,23 +59,13 @@
                                     </div>
                                     <div class="row">
                                         <div class="col">
-                                            <div class="checkbox">
-                                                <label>
-                                            <input type="checkbox" name="remember me"> Remember me
-                                        </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col">
                                             <input name="type" value="Sign in" class="btn btn-lg btn-primary btn-block" type="submit">
                                         </div>
                                     </div>
-
                                 </form>
                             </div>
                             <div class="tab-pane" id="register-form">
-                                <form action="index/" method="POST">
+                                <form action="/" method="POST">
                                     {{ csrf_input }}
                                     <div class="row">
                                         <div class="col">

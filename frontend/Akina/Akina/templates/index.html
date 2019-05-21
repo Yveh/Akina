@@ -1,68 +1,31 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Akina</title>
-    <link href="/static/css/bootstrap.css" rel="stylesheet">
-    <link href="/static/css/index.css" rel="stylesheet">
-    <script src="/static/js/jquery.js"></script>
-    <script src="/static/js/bootstrap.js"></script>
-</head>
-
-<body>
-    <header>
-        <div id="navbarHeader" class="collapse py-4">
-            <div class="container">
-                <form action="index/" method="POST">
-                    {{ csrf_input }}
-                    <div class="row">
-                        <div class="col">
-                            <div class="form-group">
-                                <input type="email" name="email" class="form-control" placeholder="Email address" id="inputEmail" required>
-                                <label for="inputEmail">Email address</label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col">
-                            <div class="form-group">
-                                <input type="password" name="password" class="form-control" placeholder="Password" id="inputPassword" required>
-                                <label for="inputPassword">Password</label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row justfy-content-between">
-                        <div class="col">
-                            <div class="checkbox">
-                                <input type="checkbox" name="remember me"> <label class="text-light">Remember me</label>
-                            </div>
-                        </div>
-                        <div class="col text-right">
-                            <a href="/" class="text-light">No account?Click here to register</a>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col">
-                            <input name="type" value="Sign in" class="btn btn-lg btn-primary btn-block" type="submit">
-                        </div>
-                    </div>
-                </form>
+{% extends "base.html" %}
+{% block head %}
+<link href="/static/css/index.css" rel="stylesheet">
+<script src="/static/js/index.js"></script>
+{% endblock %}
+{% block main %}
+<div class="container" id="main">
+    <div class="row">
+        <div class="col-4">
+            <div class="form">
+                <div class="form-group">
+                    <input type="text" name="loc1" class="form-control" placeholder="From" id="loc1" required>
+                    <label for="loc1">From</label>
+                </div>
+                <div class="form-group">
+                    <input type="date" name="date" class="form-control" placeholder="date" id="loc1" required>
+                </div>
             </div>
         </div>
-        <div id="navbar" class="navbar navbar-dark bg-dark box-shadow">
-            <div class="container d-flex justfy-content-between">
-                <a href="#" class="navbar-brand d-flex align-items-center">
-                    <strong>Akina</strong>
-                </a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarHeader">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+        <div class="col-4">
+            <span class="oi oi-loop" onclick="swapLoc1Loc2()" aria-hidden="true" id="swapButton"></span>
+        </div>
+        <div class="col-4">
+            <div class="form-group">
+                <input type="text" name="loc2" class="form-control" placeholder="To" id="loc2" required>
+                <label for="loc2">To</label>
             </div>
         </div>
-    </header>
-</body>
-
-</html>
+    </div>
+</div>
+{% endblock %}

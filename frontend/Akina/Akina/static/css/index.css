@@ -1,53 +1,7 @@
-body {
-    background-image: url(/static/img/bg.jpeg);
-    background-size: cover;
-    background-attachment: fixed;
+#main {
+    margin-top: 1rem;
 }
 
-#navbarHeader {
-    background-color: #343a40;
-    opacity: 0.8;
-}
-
-#navbar {
-    opacity: 0.8;
-}
-
-:root {
-    --form-group-input-padding: .75rem;
-}
-
-.form-group {
-    position: relative;
-}
-
-.form-group>input {
-    padding: var(--form-group-input-padding);
-}
-
-.form-group>label {
-    padding: var(--form-group-input-padding);
-    position: absolute;
-    top: 0;
-    left: 0;
-    display: block;
-    width: 100%;
-    margin-bottom: 0;
-    line-height: 1.5;
-    color: #495057;
-    border: 1px solid transparent;
-    border-radius: .25rem;
-    transition: all .1s ease-in-out;
-}
-
-.lform-group input:not(:placeholder-shown) {
-    padding-top: calc(var(--form-group-input-padding) + var(--form-group-input-padding) * (2 / 3));
-    padding-bottom: calc(var(--form-group-input-padding) / 3);
-}
-
-.form-group input:not(:placeholder-shown)~label {
-    padding-top: calc(var(--form-group-input-padding) / 3);
-    padding-bottom: calc(var(--form-group-input-padding) / 3);
-    font-size: 12px;
-    color: #777;
+#swapButton{
+    font-size: 1rem;
 }
