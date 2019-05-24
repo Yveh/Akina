@@ -222,6 +222,7 @@ private:
             else
                 r = m;
         }
+        return l;
     }
 //	int search_rank_in_block(const Key &key,const Block &b,char *buffer)
 //	{
@@ -267,6 +268,7 @@ private:
             else
                 r = m;
         }
+        return l;
     }
 	//Used after nowroot has judged not to be nulloff_t
 	int block_insert(Block &b,const Key &key,const Data &data)
