@@ -8,6 +8,9 @@
 #include <iostream>
 #include <fstream>
 #include <cstring>
+#include <assert.h>
+
+#define DEBUG
 constexpr off_t nulloff_t = 0xdeadbeef;
 class ExMemory
 {
@@ -22,7 +25,7 @@ class ExMemory
 public:
     ExMemory() {
         head = new node;
-        head->nex = new node(3 * sizeof(off_t) + sizeof(size_t),nulloff_t,head);
+        head->nex = new node(3 * sizeof(off_t) + sizeof(size_t) + 1,nulloff_t,head);
         head->nex->nex = tail = new node;
         tail->pre = head->nex;
     }
@@ -45,8 +48,7 @@ public:
             delete p;
             p = q;
         }
-        head->nex = new node(0,nulloff_t,head);
-        head->nex->nex = tail;
+        head->nex = new node(3 * sizeof(off_t) + sizeof(size_t) + 1,nulloff_t,head,tail);
         tail->pre = head->nex;
     }
 
@@ -115,10 +117,15 @@ public:
         node *p = head->nex;
         while (p != tail)
         {
+#ifdef DEBUG
+            std::cout << "www\n";
+            std::cout << p->node_start <<" "<< p->node_end<< "\n";
+#endif
             MMFile.write(reinterpret_cast<char*> (&p->node_start),sizeof(off_t));
             MMFile.write(reinterpret_cast<char*> (&p->node_end),sizeof(off_t));
             p = p->nex;
         }
+        MMFile.flush();
         MMFile.close();
     }
 };
