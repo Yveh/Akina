@@ -10,7 +10,16 @@ def passwordChecker(x):
     return len(x) > 0 and len(x) <= 20 and re.match(r"^\S+$", x) != None
 
 def emailChecker(x):
-    return len(x) > 0 and len(x) <= 20 and re.match(r"^[a-z0-9A-Z]+[- | a-z0-9A-Z . _]+@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-z]{2,}$", x) != None
+    return len(x) > 0 and len(x) <= 20 and re.match("^[a-z0-9A-Z]+[- | a-z0-9A-Z . _]+@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-z]{2,}$", x) != None
 
 def phoneChecker(x):
     return len(x) > 0 and len(x) <= 20 and re.match(r"^\S+$", x) != None
+
+def locChecker(x):
+    return 1
+
+def dateChecker(x):
+    return 1
+
+def catalogChecker(x):
+    return 0

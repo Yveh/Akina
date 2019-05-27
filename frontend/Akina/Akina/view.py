@@ -26,7 +26,7 @@ def loginRender(request):
             w.append('inputPhoneR')
         c['message'] = w
         if (w):
-            render(request, 'login.html', c)
+            return render(request, 'login.html', c)
 
         print('command' + ' ' + 'register' + ' ' + uname + ' ' + upassword + ' ' + uemail + ' ' + uphone + '\n')
         ret = uclient.post_and_get('command' + ' ' + 'register' + ' ' + uname + ' ' + upassword + ' ' + uemail + ' ' + uphone + '\n')
@@ -55,7 +55,7 @@ def indexRender(request):
             w.append('inputPassword')
         c['message'] = w
         if (w):
-            render(request, 'login.html', c)
+            return render(request, 'login.html', c)
 
         print('command:' + 'login' + ' ' + uid + ' ' + upassword + '\n')
         ret = uclient.post_and_get('login' + ' ' + uid + ' ' + upassword + '\n')
@@ -71,6 +71,49 @@ def indexRender(request):
             request.session['privilege'] = ret[-1]
             return render(request, 'index.html')
         
+    return render(request, 'index.html')
+
+def trainRender(request):
+    if (request.method == 'POST'):
+        uloc1 = request.POST.get('loc1')
+        uloc2 = request.POST.get('loc2')
+        utransfer = request.POST.get('transfer')
+        udate = request.POST.get('date')
+        ucatalog = request.POST.get('catalog')
+        c = {}
+        w = []
+        if (uloc1 == uloc2):
+            w.append('loc1')
+            w.append('loc2')
+        else:
+            if (not inputchecker.locChecker(uloc1)):
+                w.append('loc1')
+            if (not inputchecker.locChecker(uloc2)):
+                w.append('loc2')
+        if (utransfer != 'on' and utransfer != 'off' or utransfer == 'on' and not request.session.get('logged_in')):
+            w.append('transfer')
+        if (not inputchecker.dateChecker(udate)):
+            w.append('date')
+        uucatalog = ''
+        for i in ucatalog:
+            uucatalog = uucatalog + i
+        if (not inputchecker.catalogChecker(uucatalog)):
+            w.append('catalog')
+        c['message'] = w
+        if (w):
+            return render(request, 'index.html', c)
+
+        if (utransfer == 'on'):
+            print('command:' + 'query_transfer' + ' ' + loc1 + ' ' + loc2 + ' ' + date + ' ' + uucatalog + '\n')
+            ret = uclient.post_and_get('query_transfer' + ' ' + loc1 + ' ' + loc2 + ' ' + date + ' ' + uucatalog + '\n')
+            print(ret)
+            return render(request, 'train.html')
+        else:
+            print('command:' + 'query_ticket' + ' ' + loc1 + ' ' + loc2 + ' ' + date + ' ' + uucatalog + '\n')
+            ret = uclient.post_and_get('query_ticket' + ' ' + loc1 + ' ' + loc2 + ' ' + date + ' ' + uucatalog + '\n')
+            print(ret)
+            return render(request, 'train.html')
+
     return render(request, 'index.html')
 
 def baseRender(request):
