@@ -13,26 +13,27 @@ def loginRender(request):
         uemail = request.POST.get('email')
         uphone = request.POST.get('phone')
         c = {}
+        w = []
         if (not inputchecker.nameChecker(uname)):
-            c['message'] = 'username'
-            return render(request, 'login.html', c)
+            w.append('inputUsernameR')
         if (not inputchecker.passwordChecker(upassword)):
-            c['message'] = 'password'
-            return render(request, 'login.html', c)
+            w.append('inputPasswordR')
         if (not inputchecker.emailChecker(uemail)):
-            c['message'] = 'email'
-            return render(request, 'login.html', c)
+            w.append('inputEmailR')
         if (not inputchecker.phoneChecker(uphone)):
-            c['message'] = 'phone'
-            return render(request, 'login.html', c)
+            w.append('inputPhoneR')
+        c['message'] = w
+        if (w):
+            render(request, 'login.html', c)
 
         print('command' + ' ' + 'register' + ' ' + uname + ' ' + upassword + ' ' + uemail + ' ' + uphone + '\n')
         ret = uclient.post_and_get('command' + ' ' + 'register' + ' ' + uname + ' ' + upassword + ' ' + uemail + ' ' + uphone + '\n')
-        if (ret != '1'):
-            c['message'] = 'rejected'
-            return render(request, 'login.html', c)
-
-        c['message'] = 'success'
+        if (ret == '0'):
+            w.append('inputUsernameR')
+            w.append('inputPasswordR')
+            w.append('inputEmailR')
+            w.append('inputPhoneR')
+            c['message'] = w
         return render(request, 'login.html', c)
 
     return render(request, 'login.html')
@@ -45,24 +46,28 @@ def indexRender(request):
         uid = request.POST.get('id')
         upassword = request.POST.get('password')
         c = {}
+        w = []
         if (not inputchecker.idChecker(uid)):
-            c['message'] = 'id'
-            return render(request, 'login.html', c)
+            w.append('inputId')
         if (not inputchecker.passwordChecker(upassword)):
-            c['message'] = 'password'
-            return render(request, 'login.html', c)
-        
+            w.append('inputPassword')
+        c['message'] = w
+        if (w):
+            render(request, 'login.html', c)
+
         print('command:' + 'login' + ' ' + uid + ' ' + upassword + '\n')
         ret = uclient.post_and_get('login' + ' ' + uid + ' ' + upassword + '\n')
-        if (ret != '1'):
-            c['message'] = 'rejected'
+        if (ret != '0'):
+            w.append('inputId')
+            w.append('inputPassword')
+            c['message'] = w
             return render(request, 'login.html', c)
-        
-        print('cmmand:' + 'query_profile' + uid + '\n')
-        ret = uclient.post_and_get('query_profile' + uid + '\n')
-
-        request.session['logged_in'] = True
-        request.session['privilege'] = int(ret)
+        else:
+            print('cmmand:' + 'query_profile' + ' ' + uid + '\n')
+            ret = uclient.post_and_get('query_profile' + uid + '\n')
+            request.session['logged_in'] = True
+            request.session['privilege'] = ret
+            return render(request, 'index.html')
         
     return render(request, 'index.html')
 
