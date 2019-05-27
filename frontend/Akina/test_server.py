@@ -53,8 +53,10 @@ if __name__ == "__main__":
 
     while True:
         establish_connection()
-        msg = client.recv(1024).decode()
-        client.send(("recieved : " + msg).encode("utf-8"))
+        msg = client.recv(1048576).decode()
+        sys.stderr.write("recieved : " + msg);
+        a = input()
+        client.send((a).encode("utf-8"))
         close_connection()
 
     server_end()

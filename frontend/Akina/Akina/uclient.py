@@ -5,6 +5,7 @@ import json
 client_socket   = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
 server_ip       = "127.0.0.1"
 server_port     = 3012
+running 		= False
 
 def init():
     sys.stderr.write("loading config...")
@@ -34,6 +35,8 @@ def client_start():
 
 
 def post_and_get(msg):
+    if (not running):
+    	client_start()
     client_socket.send(msg.encode("utf-8"))
     return client_socket.recv(1048576).decode()
 
