@@ -8,31 +8,31 @@ def loginRender(request):
         return redirect('/index')
 
     if request.method == 'POST':
-        uname = request.POST.get('name')
+        uname = request.POST.get('username')
         upassword = request.POST.get('password')
         uemail = request.POST.get('email')
         uphone = request.POST.get('phone')
         c = {}
-        if (not inputchecker.nameChecker(name)):
-            c['message'] = 'register failed: invalid name'
+        if (not inputchecker.nameChecker(uname)):
+            c['message'] = 'username'
             return render(request, 'login.html', c)
         if (not inputchecker.passwordChecker(upassword)):
-            c['message'] = 'register failed：invalid password'
+            c['message'] = 'password'
             return render(request, 'login.html', c)
-        if (not inputchecker.emailChecker(ueamil)):
-            c['message'] = 'register failed：invalid email'
+        if (not inputchecker.emailChecker(uemail)):
+            c['message'] = 'email'
             return render(request, 'login.html', c)
         if (not inputchecker.phoneChecker(uphone)):
-            c['message'] = 'register failed: invalid phone'
+            c['message'] = 'phone'
             return render(request, 'login.html', c)
 
         print('command' + ' ' + 'register' + ' ' + uname + ' ' + upassword + ' ' + uemail + ' ' + uphone + '\n')
         ret = uclient.post_and_get('command' + ' ' + 'register' + ' ' + uname + ' ' + upassword + ' ' + uemail + ' ' + uphone + '\n')
         if (ret != '1'):
-            c['message'] = 'register failed: database rejected'
+            c['message'] = 'rejected'
             return render(request, 'login.html', c)
 
-        c['message'] = 'register successed'
+        c['message'] = 'success'
         return render(request, 'login.html', c)
 
     return render(request, 'login.html')
@@ -46,16 +46,16 @@ def indexRender(request):
         upassword = request.POST.get('password')
         c = {}
         if (not inputchecker.idChecker(uid)):
-            c['message'] = 'login failed: invalid id'
+            c['message'] = 'id'
             return render(request, 'login.html', c)
         if (not inputchecker.passwordChecker(upassword)):
-            c['message'] = 'login failed: invalid password'
+            c['message'] = 'password'
             return render(request, 'login.html', c)
         
         print('command:' + 'login' + ' ' + uid + ' ' + upassword + '\n')
         ret = uclient.post_and_get('login' + ' ' + uid + ' ' + upassword + '\n')
         if (ret != '1'):
-            c['message'] = 'login failed: database rejected'
+            c['message'] = 'rejected'
             return render(request, 'login.html', c)
         
         print('cmmand:' + 'query_profile' + uid + '\n')
