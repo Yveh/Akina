@@ -31,9 +31,6 @@ namespace server {
 
 	char buffer[buffer_size + 1];
 
-	UserManager user_manager;
-	TrainManager train_manager;
-
 	void stderr_Failed(string s = "") {
 		cerr << "\033[1;31mFailed\033[0m " << s << endl;
 	}
@@ -63,7 +60,10 @@ namespace server {
 	}
 
 	int shell(char buf[], int len) {
-		stringstream is, os;
+		static stringstream is, os;
+		static UserManager user_manager;
+		static TrainManager train_manager;
+		
 		is.str(buf);
 		os.str("");
 
@@ -184,7 +184,6 @@ namespace server {
 	}
 
 }
-
 
 int main() {
 	server::init();

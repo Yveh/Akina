@@ -27,7 +27,7 @@ def client_start():
     try:
         client_socket.connect((server_ip, server_port))
     except:
-        sys.stderr.write("\033[1;31mFailed\033[0m")
+        sys.stderr.write("\033[1;31mFailed\033[0m\n")
         return False
     sys.stderr.write("\033[1;32mOK\033[0m\n")
     return True
@@ -41,7 +41,7 @@ def client_end():
     client_socket.close()
 
 
-if __name__ == "__main__":
+if __name__ == "__main__": # For testing
     client_start()
     print(post_and_get("hello"))
     client_end()

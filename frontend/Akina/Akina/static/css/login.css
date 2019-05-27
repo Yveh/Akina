@@ -1,3 +1,17 @@
+@font-face {
+	font-family: topcoder;
+	src:url(/static/fonts/ProximaNovaLight.woff);
+}
+
+@font-face {
+	font-family: Roboto;
+	src:url(/static/fonts/Roboto.woff2);
+}
+
+body {
+    font-family: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+
 #cover {
     height: 100vh;
     background-image: url(/static/img/bg.jpeg);
@@ -11,17 +25,19 @@
 }
 
 #title-box::after {
+/*
     background-image: url(/static/img/bg.jpeg);
     background-size: cover;
     background-attachment: fixed;
+	filter: blur(20px);
+*/
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    filter: blur(5px);
-    background-color: rgba(255, 255, 255, 0.8);
+    background-color: rgba(200, 150, 150, 0.8);
     z-index: -1;
 }
 
@@ -30,10 +46,11 @@
 }
 
 #title {
-    text-shadow: #FF0000 0 0 10px;
-    color: white;
-    font-size: 4.5rem;
+    text-shadow: #000000 0 0 3px;
+    color: #FFFFFF;
+    font-size: 6rem;
     font-weight: bold;
+    font-family: topcoder, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
     -webkit-box-reflect: below -13px -webkit-linear-gradient(transparent, transparent 50%, rgba(255, 255, 255, .5));
 }
 
