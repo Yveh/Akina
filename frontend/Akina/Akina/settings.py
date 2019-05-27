@@ -134,3 +134,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'Akina/static'),)  
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
+# 建议配置，阻止 javascript 对会话数据的访问，提高安全性。
+SESSION_COOKIE_HTTPONLY= True

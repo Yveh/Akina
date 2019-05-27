@@ -1,11 +1,13 @@
 from django.http import HttpResponse 
 from django.shortcuts import render
+from django.shortcuts import redirect
+
 from . import uclient
 from . import inputchecker
 
 def loginRender(request):
     if request.session.get('logged_in', None):
-        return redirect('/index')
+        return redirect('index/')
 
     if request.method == 'POST':
         uname = request.POST.get('username')
@@ -66,7 +68,7 @@ def indexRender(request):
             print('cmmand:' + 'query_profile' + ' ' + uid + '\n')
             ret = uclient.post_and_get('query_profile' + uid + '\n')
             request.session['logged_in'] = True
-            request.session['privilege'] = ret
+            request.session['privilege'] = ret[-1]
             return render(request, 'index.html')
         
     return render(request, 'index.html')
