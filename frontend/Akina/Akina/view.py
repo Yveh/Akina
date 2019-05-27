@@ -28,7 +28,7 @@ def loginRender(request):
 
         print('command' + ' ' + 'register' + ' ' + uname + ' ' + upassword + ' ' + uemail + ' ' + uphone + '\n')
         ret = uclient.post_and_get('command' + ' ' + 'register' + ' ' + uname + ' ' + upassword + ' ' + uemail + ' ' + uphone + '\n')
-        if (ret == '0'):
+        if (ret != '1'):
             w.append('inputUsernameR')
             w.append('inputPasswordR')
             w.append('inputEmailR')
@@ -57,7 +57,7 @@ def indexRender(request):
 
         print('command:' + 'login' + ' ' + uid + ' ' + upassword + '\n')
         ret = uclient.post_and_get('login' + ' ' + uid + ' ' + upassword + '\n')
-        if (ret != '0'):
+        if (ret != '1'):
             w.append('inputId')
             w.append('inputPassword')
             c['message'] = w
