@@ -1,0 +1,6 @@
+#cover {
+    height: 100vh;
+    background-image: url(/static/img/bg.jpeg);
+    background-size: cover;
+    background-attachment: fixed;
+}

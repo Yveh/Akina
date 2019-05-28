@@ -19,8 +19,10 @@ from django.urls import path
 from . import view
 
 urlpatterns = [
-    path(r'', view.loginRender),
-    path(r'index/', view.indexRender),
+    path(r'', view.startRender),
+    path(r'login/', view.loginRender),
     path(r'train/', view.trainRender),
+    path(r'ticket/', view.ticketRender),
+    path(r'manage/', view.manageRender),
     path(r'base/', view.baseRender),
 ]

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block head %}
-<link href="/static/css/index.css" rel="stylesheet">
-<script src="/static/js/index.js"></script>
+<link href="/static/css/ticket.css" rel="stylesheet">
+<script src="/static/js/ticket.js"></script>
 <style type="text/css">
     {% if message %}
         {% for i in message %}
@@ -18,37 +18,20 @@
         <div class="box-transparent py-4 px-4">
             <form action="/train/" method="POST">
                 {{ csrf_input }}
-                <div class="row">
-                    <div class="col-5">
-                        <div class="form-group">
-                            <input type="text" name="loc1" class="form-control" placeholder="From" id="loc1" required>
-                            <label for="loc1">From</label>
-                        </div>
-                    </div>
-                    <div class="col-2 d-flex justify-content-center">
-                        <i class="fa fa-arrows-h fa-3x" onclick="swapLoc1Loc2()"></i>
-                    </div>
-                    <div class="col-5">
-                        <div class="form-group">
-                            <input type="text" name="loc2" class="form-control" placeholder="To" id="loc2" required>
-                            <label for="loc2">To</label>
-                        </div>
-                    </div>
-                </div>
                 <div class="row d-flex align-items-center">
-                    <div class="col-2">
-                        <div class="custom-control custom-checkbox">
-                            <input name="transfer" type="checkbox" class="custom-control-input" id="transfer">
-                            <label class="custom-control-label" for="transfer"><b>Transfer</b></label>
+                    <div class="col-4">
+                        <div class="form-group">
+                            <input type="text" name="id" class="form-control" placeholder="User id" id="inputId" required>
+                            <label for="inputId">User id</label>
                         </div>
                     </div>
-                    <div class="col-5">
+                    <div class="col-4">
                         <div class="form-group">
                             <input type="date" name="date" class="form-control" placeholder="date" id="date" required>
                         </div>
                     </div>
-                    <div class="col-5">
-                        <div class="form-group">
+                    <div class="col-4">
+                       <div class="form-group">
                             <select name="catalog" class="selectpicker" multiple data-actions-box="true" title="Choose train types" data-width="100%" id="catalog">
                                 <option>C</option>
                                 <option>D</option>
@@ -59,7 +42,7 @@
                                 <option>Z</option>
                             </select>
                         </div>
-                    </div>           
+                    </div>
                 </div>
                 <div class="row">
                     <div class="col">
@@ -70,4 +53,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
+{% endblock%}

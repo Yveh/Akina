@@ -13,7 +13,7 @@
     <style type="text/css">
         {% if message %}
             {% for i in message %}
-                #{{ i }}{ 
+                #{{ i }} {
                     box-shadow: 0 0 0 0.2rem rgb(255, 0, 0);
                 }
             {% endfor %}
@@ -38,17 +38,17 @@
                             <div class="col">
                                 <ul class="nav nav-tabs nav-fill justify-content-center mb-3">
                                     <li class="nav-item">
-                                        <a class="nav-link active" data-toggle="tab" href="#login-form">Sign in</a>
+                                        <a class="nav-link active" data-toggle="tab" href="#login-form">登录</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link" data-toggle="tab" href="#register-form">Sign up</a>
+                                        <a class="nav-link" data-toggle="tab" href="#register-form">注册</a>
                                     </li>
                                 </ul>
                             </div>
                         </div>
                         <div class="tab-content">
                             <div class="tab-pane active" id="login-form">
-                                <form action="/index/" method="POST">
+                                <form action="" method="POST">
                                     {{ csrf_input }}
                                     <div class="row">
                                         <div class="col">
@@ -70,14 +70,14 @@
                                     </div>
                                     <div class="row">
                                         <div class="col">
-                                            <input value="Sign in" class="btn btn-lg btn-primary btn-block"
+                                            <input name="type" value="登录" class="btn btn-lg btn-primary btn-block"
                                                 type="submit">
                                         </div>
                                     </div>
                                 </form>
                             </div>
                             <div class="tab-pane" id="register-form">
-                                <form action="/" method="POST">
+                                <form action="" method="POST">
                                     {{ csrf_input }}
                                     <div class="row">
                                         <div class="col">
@@ -117,7 +117,7 @@
                                     </div>
                                     <div class="row">
                                         <div class="col">
-                                            <input value="Sign up" class="btn btn-lg btn-primary btn-block"
+                                            <input name="type" value="注册" class="btn btn-lg btn-primary btn-block"
                                                 type="submit">
                                         </div>
                                     </div>

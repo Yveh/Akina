@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block head %}
+<link href="/static/css/manage.css" rel="stylesheet">
+<script src="/static/js/manage.js"></script>
+<style type="text/css">
+    {% if message %}
+        {% for i in message %}
+            #{{ i }}{ 
+                box-shadow: 0 0 0 0.2rem rgb(255, 0, 0);
+            }
+        {% endfor %}
+    {% endif %}
+</style>
+{% endblock %}
+{% block main %}
+<div class="d-flex align-items-center" id="main">
+    <div class="container">
+        <div class="box-transparent py-4 px-4">
+            <form action="" method="POST">
+                {{ csrf_input }}
+                <div class="row d-flex align-items-center">
+                    <div class="col-6">
+                        <div class="form-group">
+                            <input type="text" name="id" class="form-control" placeholder="Train id" id="inputId" required>
+                            <label for="inputId">Train id</label>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <input value="搜索车次" class="btn btn-lg btn-primary btn-block" type="submit">
+                    </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock%}

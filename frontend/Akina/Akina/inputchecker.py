@@ -1,7 +1,7 @@
 import re
 
 def idChecker(x):
-    return len(x) > 0 and len(x) <= 10 and re.match(r"^[1-9][0-9]+$", x) != None and int(x) >= 2019
+    return len(x) > 0 and len(x) <= 10 and re.match(r"^[1-9][0-9]+$", x) != None
 
 def nameChecker(x):
     return len(x) > 0 and len(x) <= 40 and re.match(r"^\S+$", x) != None
