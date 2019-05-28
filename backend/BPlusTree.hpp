@@ -15,7 +15,15 @@ template <class Key,class Data,size_t Nodesize,class Cmp=std::less<Key>>
 class BPlusTree
 {
 private:
+
 	std::fstream File;
+//	XXX：	非常非常不赞成这么写！
+//			文件操作不要在这个文件里写！
+//			哪怕写成函数都行，调用另一个 header 里的函数，哪怕函数是暴力都得开一个文件。
+//			多文件的工程最大的目的就是为了优化，所以你必须把关键操作写为函数，方便优化。
+//	TODO：	实现一个可用的文件管理 header，并且替换所有文件操作。
+		
+	
 	std::string FileName;
 	ExMemory MemoryManager;
 
@@ -43,12 +51,16 @@ private:
 	const size_t N = (Nodesize - sizeof(Node)) / (sizeof(off_t) + sizeof(Key)) - 1;
 	const size_t M = (Nodesize - sizeof(Block)) / (sizeof(Data) + sizeof(Key)) - 1;
 
+//	XXX：	这个地方我改了，我也改了一些你的指针的东西，但是没改完。
+//			如果你觉得你的写法是有其他道理的，那回滚版本时先修复内存溢出的问题再搞，一定一定不能返回一个 new 的 copy。
+//	TODO：	修改这个函数，并且检查所有这个函数的调用；把 delete new 全部搞掉，或者全部写好并且传递指针 / 引用。
+ 
 	Node new_node(NodeType nodetype,const Key &key)
 	{
-		Node *p = new Node(nodetype,key,1,MemoryManager.malloc(Nodesize));
-		return *p;
+		return Node(nodetype,key,1,MemoryManager.malloc(Nodesize));
 	}
-	void delete_Node (Node &p)
+
+	void delete_Node (Node p)
 	{
 		if (p.pre != nulloff_t)
 		{
@@ -61,8 +73,8 @@ private:
 			pn.pre = p.pre;
 		}
 		MemoryManager.free(p.pos,Nodesize);
-		delete &p;
 	}
+
 	class Block
 	{
 		size_t elementNumber;
@@ -76,11 +88,11 @@ private:
 	public:
 		Block(size_t elementNumber = 0,Key key0 = Key(),off_t pos = nulloff_t,off_t pre = nulloff_t,off_t nex = nulloff_t,off_t father = nulloff_t) : elementNumber(elementNumber),key0(key0),pos(pos),pre(pre),nex(nex),father(father){}
 	};
+
+//	TODO：	修改这个函数，并且检查所有这个函数的调用；把 delete new 全部搞掉，或者全部写好并且传递指针 / 引用。
 	Block new_block(const Key &key)
 	{
-		Block *b = new Block(1,key,MemoryManager.malloc(Nodesize));
-
-		return *b;
+		return block(1,key,MemoryManager.malloc(Nodesize));
 	}
 	void delete_block(Block &b)
 	{
@@ -95,11 +107,15 @@ private:
 			bn.pre = b.pre;
 		}
 		MemoryManager.free(b.pos,Nodesize);
-		delete &b;
 	}
 	bool IsEqual(const Key &x,const Key &y){
 		return !Cmp1(x,y) && !Cmp1(y,x);
 	}
+
+//	XXX:	感觉你滥用了（或者是我理解的问题） reinterpret_cast，如果要读一个定长结构体感觉直接喂头地址就好了。
+//			当然我不知道是不是有额外信息，如果有，可以把需要写进文件的部分放在一起，class / struct 不会改变数据的顺序。
+//	TODO：	更换为用通用头文件函数写文件的方法，并且尽量只调用一次，避免降低读写 / 优化效率。
+
 	void read_bptree_info() {
 		File.seekg(0);
 		File.read(reinterpret_cast<char *>(&Root), sizeof(off_t));
@@ -116,19 +132,22 @@ private:
 		File.write(reinterpret_cast<char *>(&ElementNumber),sizeof(size_t));
 		File.flush();
 	}
+
+//	XXX: MODIFIED
 	Node read_node(off_t root) {
 		File.seekg(root);
-		Node *p = new Node;
-		File.read(reinterpret_cast<char *>(p),sizeof(Node));
-		return *p;
+		Node p;
+		File.read(&p,sizeof(Node));
+		return p;
 	}
 
+//	XXX: MODIFIED
 	Block read_block(off_t root)
 	{
 		File.seekg(root);
-		Block *b = new Block;
-		File.read(reinterpret_cast<char *>(b),sizeof(Block));
-		return *b;
+		Block b;
+		File.read(&b,sizeof(Block));
+		return b;
 	}
 	void write_node(Node &p)
 	{
