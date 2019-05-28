@@ -9,27 +9,31 @@
 class TrainManager
 {
 private:
-	BPlusTree<String<20>,TrainValue,30,30> AlTrain;
-	BPlusTree<StationKey,short,100,1000> LocToId;
-	BPlusTree<UTicketKey,short,30,30> UserTicket;
+	BPlusTree<String<20>,TrainValue,20480> AlTrain;
+	BPlusTree<StationKey,short,4096> LocToId;
+	BPlusTree<UTicketKey,short,4096> UserTicket;
 	FileManager<short> LeftTicket;
 	long LSiz;
 
 
 public:
-	TrainManager()
+	TrainManager():AlTrain("AlTrain.bin","_AlTrain.bin"),LocToId("LocToId.bin","_LocToId.bin"),UserTicket("UserTicket.bin","_UserTicket.bin")
 	{
+		LeftTicket.SetName("LeftTicket.bin");
 		LSiz=LeftTicket.size();
 	}
 
 	~TrainManager() = default;
 	int AddTrain(const String<20> &Id,TrainValue &Train)
 	{
-		Train.LeftPos=-1;
-		return AlTrain.Insert(Id,Train);
+		if (AlTrain.Insert(Id,Train))return 1;
+		return 0;
 	}
 	int ModTrain(const String<20> &Id,TrainValue &Train)
 	{
+		TrainValue xTrain;
+		if (AlTrain.Find(Id,xTrain)==0)  return 0;
+		if (xTrain.LeftPos>=0) return 0;
 		Train.LeftPos=-1;
 		return AlTrain.Modify(Id,Train);
 	}
@@ -123,14 +127,14 @@ public:
 		else UserTicket.Modify(key,x.Num-y);
 		return 1;
 	}
-	void QueryOrder(size_t UserId,short Date,String<20> ct,std::ostream &os)
+	void QueryOrder(size_t UserId,short Date,const String<20> &ct,std::ostream &os)
 	{
 		bool ch[26]={0};
 		for (int i=0;ct[i]!='\0';++i) ch[ct[i]-'A']=true;
 		UTicketKey x;x.UserId=UserId;x.Date=Date;
 		TrainValue t;
-		Vector<UTicketKey> Vkey;
-		Vector<short> Vdata;
+		sjtu::vector<UTicketKey> Vkey;
+		sjtu::vector<short> Vdata;
 		size_t cnt=0;
 		UserTicket.AskArr(x,Cmp_UT,Vkey,Vdata);
 		for (int i=0;i<Vkey.size();++i)
@@ -154,7 +158,36 @@ public:
 			if (t.Time1[i]<mk) ++plus;mk=t.Time1[i];
 			if (t.Time2[i]<mk) ++plus;mk=t.Time2[i];
 		}
-		os<<k.TrainId<<t.Loc[k.l2]<<StrDate(k.Date+plus)<<StrTime(t.Time1[k.l2]);
+		os<<k.TrainId<<t.Loc[k.l2]<<StrDate(k.Date+plus)<<StrTime(t.Time1[k.l2])<<"\n";
+	}
+	void QueryTicket(const String<20> l1,const String<20> &l2,short Date,const String<20> ct,std::ostream &os)
+	{
+		bool ch[26]={0};
+		for (int i=0;ct[i]!='\0';++i) ch[ct[i]-'A']=true;
+		StationKey k1,k2;k1.Loc=l1;k2.Loc=l2;
+		sjtu::vector<StationKey> Vkey1,Vkey2;
+		sjtu::vector<short> Vdata1,Vdata2;
+		LocToId.AskArr(k1,Cmp_SK,Vkey1,Vdata1);
+		LocToId.AskArr(k2,Cmp_SK,Vkey2,Vdata2);
+		size_t i=0,j=0;
+		TrainValue Train;
+		while (i<Vkey1.size()||j<Vkey2.size())
+		{
+			if (Vkey1[i].TrainId<Vkey2[j].TrainId) {++i;continue;}
+			if (Vkey1[i].TrainId>Vkey2[j].TrainId) {++j;continue;}
+			if (Vdata1[i]>=Vdata2[j]) {++i;++j;continue;}
+			AlTrain.Find(Vkey1[i].TrainId,Train);
+
+		}
+
+	}
+	void Clear()
+	{
+		LocToId.Clear();
+		AlTrain.Clear();
+		UserTicket.Clear();
+		LeftTicket.Clear();
+		LSiz=0;
 	}
 };
 
