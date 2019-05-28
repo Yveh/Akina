@@ -10,11 +10,6 @@
 template <size_t N>
 class String
 {
-public:
-	friend bool operator<(const String<N> &l,const String<N> &r)
-	{
-		return strcmp(l.ch,r.ch)<0;
-	}
 private:
 	char ch[N+1];
 public:
@@ -23,7 +18,7 @@ public:
 	String (const char* other){strcpy(ch,other);}
 	String &operator=(const String &other){strcpy(ch,other.ch);}
 	~String()=default;
-	int cmp(const String &other) const {return strcmp(ch,other.ch);}
+	int cmp(const String &other) {return strcmp(ch,other.ch);}
 	bool operator==(const String &other){return strcmp(ch,other.ch)==0;}
 	bool operator!=(const String &other){return strcmp(ch,other.ch)!=0;}
 	bool operator>(const String &other){return strcmp(ch,other.ch)>0;}
@@ -33,7 +28,6 @@ public:
 	bool operator>(const char* other){return strcmp(ch,other)>0;}
 	bool operator<(const char* other){return strcmp(ch,other)<0;}
 	char &operator[](const size_t pos) {return ch[pos];}
-	const char &operator[](const size_t pos) const {return ch[pos];}
 	friend std::ostream &operator<<(std::ostream &os, const String &Str){os << Str.ch<<" ";return os;}
 	friend std::istream &operator>>(std::istream &is, String &Str){is>>Str.ch;return is;}
 	inline short ToTime(){return ch[0]*600+ch[1]*60+ch[3]*10+ch[4]-32208;}
@@ -57,7 +51,7 @@ String<5> StrTime(const short &t)
 	x[1]=(t/60)%10+48;
 	x[2]=':';
 	x[3]=(t%60)/10+48;
-	x[4]=t%10+48;
+	x[4]=t%10;
 	x[5]='\0';
 	return x;
 }
@@ -69,5 +63,7 @@ String<10> StrDate(const short &t)
 	x[10]='\0';
 	return x;
 }
+
+
 
 #endif //AKINA_BASICSTRING_HPP
