@@ -10,7 +10,7 @@
 
 - **前端**：Django + bootstrap
 
-- **通信**: 同步 socket
+- **通信**：同步 socket
 
 ## 规范
 
