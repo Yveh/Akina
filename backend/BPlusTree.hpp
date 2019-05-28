@@ -3,12 +3,13 @@
 //#include "FileManager.hpp"
 #include "ExMemory.hpp"
 #include "BasicStruct.hpp"
-#include "vector.hpp"
 #include <fstream>
 #include <functional>
 #include <assert.h>
 
 //#define DEBUG
+=======
+#define DEBUG
 
 enum NodeType{INTERNAL,LEAF};
 template <class Key,class Data,size_t Nodesize,class Cmp=std::less<Key>>
