@@ -81,7 +81,7 @@ def trainRender(request):
         uloc2 = request.POST.get('loc2')
         utransfer = request.POST.get('transfer')
         udate = request.POST.get('date')
-        ucatalog = request.POST.get('catalog')
+        ucatalog = request.POST.getlist('catalog')
 
         if (uloc1 == uloc2):
             w.append('loc1')
@@ -97,6 +97,7 @@ def trainRender(request):
         if (not inputchecker.dateChecker(udate)):
             w.append('date')
         uucatalog = ''
+        print(ucatalog)
         for i in ucatalog:
             uucatalog = uucatalog + i
         if (not inputchecker.catalogChecker(uucatalog)):

@@ -54,8 +54,44 @@ if __name__ == "__main__":
     while True:
         establish_connection()
         msg = client.recv(1048576).decode()
-        sys.stderr.write("recieved : " + msg);
-        a = "1"
+        sys.stderr.write("recieved : " + msg)
+        if (msg == 'register 张三 zhangsan zhangsan@sjtu.edu.cn 12345678\n'):
+            a = '2018\n'
+        elif (msg == 'login 2018 zhangsan\n'):
+            a = '1\n'
+        elif (msg == 'query_profile 2018\n'):
+            a = '张三 zhangsan@sjtu.edu.cn 12345678 2\n'
+        elif (msg == 'modify_profile 2018 张三 zhangsan zhangsan@sjtu.edu.cn 87654321\n'):
+            a = '1\n'
+        elif (msg == 'modify_privilege 2018 2018 1\n'):
+            a = '0\n'
+        elif (msg == 'query_ticket 北京 上海 2018-03-28 CD\n'):
+            a = 'c100 北京 2018-03-28 08:00 上海 2018-03-28 08:01 一等座 2000 765.50 二等座 2000 765.49 三等座 2000 765.48\n'
+        elif (msg == 'query_transfer 北京 上海 2018-03-28 CD\n'):
+            a = 'c101 北京 2018-03-28 08:00 夏威夷 2018-03-28 08:01 一等座 2000 765.50 二等座 2000 765.49 三等座 2000 765.48\nc102 夏威夷 2018-03-28 08:02 上海 2018-03-28 08:03 一等座 2000 765.50 二等座 2000 765.49 三等座 2000 765.48\n'
+        elif (msg == 'buy_ticket 6666 1 C101 北京 夏威夷 2018-03-28 一等座\n'):
+            a = '1\n'
+        elif (msg == 'query_order 6666 2018-03-28 C\n'):
+            a = '1\nc101 北京 2018-03-28 08:00 夏威夷 2018-03-28 08:01 一等座 1 765.50 二等座 0 765.49 三等座 0 765.48\n'
+        elif (msg == 'refund_ticket 6666 1 C101 北京 夏威夷 2018-03-28 一等座\n'):
+            a = '1\n'
+        elif (msg == 'add_train abc123456 G123456 G 2 1 商务座\n北京 xx:xx 08:00 00:00 ￥0.0\n夏威夷 08:01 xx:xx 00:00 ￥1.5\n'):
+            a = '1\n'
+        elif (msg == 'sale_train abc123456\n'):
+            a = '1\n'
+        elif (msg == 'query_train abc123456\n'):
+            a = 'abc123456 G123456 G 2 1 商务座\n北京 xx:xx 08:00 00:00 ￥0.0\n夏威夷 08:01 xx:xx 00:00 ￥1.5\n'
+        elif (msg == 'delete_train abc123456\n'):
+            a = '1\n'
+        elif (msg == 'modify_train abc123456 G123456 G 2 1 商务座\n北京 xx:xx 08:00 00:00 ￥0.0\n夏威夷 08:02 xx:xx 00:00 ￥1.5\n'):
+            a = '0\n'
+        elif (msg == 'clean\n'):
+            a = '1\n'
+        elif (msg == 'exit\n'):
+            a = 'BYE\n'
+        else:
+            a = 'command wrong\n'
+
         client.send((a).encode("utf-8"))
         close_connection()
 
