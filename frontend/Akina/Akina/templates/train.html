@@ -15,6 +15,11 @@
 {% block main %}
 <div class="d-flex align-items-center" id="main">
     {% if not querydone%}
+    <style type="text/css">
+    body {
+        height: 100vh;
+    }
+    </style>
     <div class="container">
         <div class="box-transparent py-4 px-4">
             <form action="" method="POST">
@@ -85,7 +90,10 @@
                         <th data-field="loc2" data-align="center" data-sortable="true">终点站</th>
                         <th data-field="date2" data-align="center" data-sortable="true">到达日期</th>
                         <th data-field="time2" data-align="center" data-sortable="true">到达时间</th>
-                        <th data-field="operator" data-align="center">操作</th>
+                        <th data-field="type" data-align="center">类型</th>
+                        <th data-field="price" data-align="center">价格</th>
+                        <th data-field="tleft" data-align="center">余票</th>
+                        <th data-field="operation" data-align="center">操作</th>
                     </tr>
               </thead>
             </table>

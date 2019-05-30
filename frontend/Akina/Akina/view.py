@@ -147,7 +147,15 @@ def trainRender(request):
                 tmp['loc2'] = utrain[4]
                 tmp['date2'] = utrain[5]
                 tmp['time2'] = utrain[6]
-                tmp['operator'] = 'qwq'
+                tmp['type'] = ''
+                tmp['price'] = ''
+                tmp['tleft'] = ''
+                tmp['operation'] = ''
+                for i in range(0, (len(utrain) - 6) // 3):
+                    tmp['type'] += r'<div>' + utrain[7 + i * 3] + r'</div>'
+                    tmp['tleft'] += r'<div>' + utrain[7 + i * 3 + 1] + r'</div>'
+                    tmp['price'] += r'<div>' + utrain[7 + i * 3 + 2] + r'</div>'
+                    tmp['operation'] += r'<div><button class="btn-primary btn-sm">购买</button></div>'
                 table.append(tmp)
             c['table'] = json.dumps(table)
             return render(request, 'train.html', c)
