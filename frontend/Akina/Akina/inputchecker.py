@@ -23,3 +23,6 @@ def dateChecker(x):
 
 def catalogChecker(x):
     return len(x) < 10 and re.match(r"^(?!.*?([CDGKOTZ]).*?\1.*?$)[CDGKOTZ]+$", x) != None
+
+def trainIDChecker(x):
+    return len(x) < 20 and re.match(r"^[cdgkotz]+\S+$", x) != None

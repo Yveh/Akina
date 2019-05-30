@@ -122,23 +122,11 @@ def trainRender(request):
         if (utransfer == 'on'):
             print('command:' + 'query_transfer' + ' ' + uloc1 + ' ' + uloc2 + ' ' + udate + ' ' + uucatalog + '\n')
             ret = uclient.post_and_get('query_transfer' + ' ' + uloc1 + ' ' + uloc2 + ' ' + udate + ' ' + uucatalog + '\n').split('\n')
-            """
-            for i in ret:
-                utrain = i.split()
-                for j in utrain:
-                    print(j)
-            """
-            rrr = ret[0].split()
-            print(rrr[1])
-            return render(request, 'train.html', c)
-        else:
-            print('command:' + 'query_ticket' + ' ' + uloc1 + ' ' + uloc2 + ' ' + udate + ' ' + uucatalog + '\n')
-            ret = uclient.post_and_get('query_ticket' + ' ' + uloc1 + ' ' + uloc2 + ' ' + udate + ' ' + uucatalog + '\n').split('\n')
             table = []
             for i in ret:
                 utrain = i.split()
-                if not utrain:
-                    break
+                if (len(utrain) <= 1):
+                    continue
                 tmp = {}
                 tmp['trainID'] = utrain[0]
                 tmp['loc1'] = utrain[1]
@@ -147,15 +135,33 @@ def trainRender(request):
                 tmp['loc2'] = utrain[4]
                 tmp['date2'] = utrain[5]
                 tmp['time2'] = utrain[6]
-                tmp['type'] = ''
-                tmp['price'] = ''
                 tmp['tleft'] = ''
-                tmp['operation'] = ''
+                tmp['operation'] = r'<button class="btn-primary btn-md">购买</button>'
                 for i in range(0, (len(utrain) - 6) // 3):
-                    tmp['type'] += r'<div>' + utrain[7 + i * 3] + r'</div>'
-                    tmp['tleft'] += r'<div>' + utrain[7 + i * 3 + 1] + r'</div>'
-                    tmp['price'] += r'<div>' + utrain[7 + i * 3 + 2] + r'</div>'
-                    tmp['operation'] += r'<div><button class="btn-primary btn-sm">购买</button></div>'
+                    tmp['tleft'] += r'<div><b>' + utrain[7 + i * 3] + r'</b>' + '   ¥' + utrain[7 + i * 3 + 2] + '   ' + utrain[7 + i * 3 + 1] + '张' + r'</div>'
+                table.append(tmp)
+            c['table'] = json.dumps(table)
+            return render(request, 'train.html', c)
+        else:
+            print('command:' + 'query_ticket' + ' ' + uloc1 + ' ' + uloc2 + ' ' + udate + ' ' + uucatalog + '\n')
+            ret = uclient.post_and_get('query_ticket' + ' ' + uloc1 + ' ' + uloc2 + ' ' + udate + ' ' + uucatalog + '\n').split('\n')
+            table = []
+            for i in ret:
+                utrain = i.split()
+                if (len(utrain) <= 1):
+                    continue
+                tmp = {}
+                tmp['trainID'] = utrain[0]
+                tmp['loc1'] = utrain[1]
+                tmp['date1'] = utrain[2]
+                tmp['time1'] = utrain[3]
+                tmp['loc2'] = utrain[4]
+                tmp['date2'] = utrain[5]
+                tmp['time2'] = utrain[6]
+                tmp['tleft'] = ''
+                tmp['operation'] = r'<button class="btn-primary btn-md">购买</button>'
+                for i in range(0, (len(utrain) - 6) // 3):
+                    tmp['tleft'] += r'<div><b>' + utrain[7 + i * 3] + r'</b>' + '   ¥' + utrain[7 + i * 3 + 2] + '   ' + utrain[7 + i * 3 + 1] + '张' + r'</div>'
                 table.append(tmp)
             c['table'] = json.dumps(table)
             return render(request, 'train.html', c)
@@ -163,17 +169,20 @@ def trainRender(request):
     return render(request, 'train.html', c)
 
 def ticketRender(request):
+    if (not request.session.get('uid')):
+        return redirect('/login/')
+
     c = {}
     w = []
     c['uid'] = request.session.get('uid')
+    c['uname'] = request.session.get('uname')
+    c['uprivilege'] = request.session.get('uprivilege')
     
     if (request.method == 'POST'):
-        uid = request.POSt.get('id')
-        udate = request.POSt.get('date')
-        ucatalog = request.POST.get('catalog')
+        uid = request.session.get('uid')
+        udate = request.POST.get('date')
+        ucatalog = request.POST.getlist('catalog')
 
-        if (not inputchecker.idChecker(uid)):
-            w.append('id')
         if (not inputchecker.dateChecker(udate)):
             w.append('date')
         uucatalog = ''
@@ -185,27 +194,47 @@ def ticketRender(request):
         if (w):
             return render(request, 'ticket.html', c)
         
-        #TO DO: show the results / refund
+        c['querydone'] = True
         print('command:' + 'query_order' + ' ' + uid + ' ' + udate + ' ' + uucatalog + '\n')
-        ret = uclient.post_and_get('query_order' + ' ' + uid + ' ' + udate + ' ' + uucatalog + '\n')
+        ret = uclient.post_and_get('query_order' + ' ' + uid + ' ' + udate + ' ' + uucatalog + '\n').split('\n')
         print(ret)
+        table = []
+        for i in ret:
+            utrain = i.split()
+            print(utrain)
+            if (len(utrain) <= 1):
+                continue
+            tmp = {}
+            tmp['trainID'] = utrain[0]
+            tmp['loc1'] = utrain[1]
+            tmp['date1'] = utrain[2]
+            tmp['time1'] = utrain[3]
+            tmp['loc2'] = utrain[4]
+            tmp['date2'] = utrain[5]
+            tmp['time2'] = utrain[6]
+            tmp['tleft'] = ''
+            tmp['operation'] = r'<button class="btn-primary btn-md">退票</button>'
+            for i in range(0, (len(utrain) - 6) // 3):
+                tmp['tleft'] += r'<div><b>' + utrain[7 + i * 3] + r'</b>' + '   ¥' + utrain[7 + i * 3 + 2] + '   ' + utrain[7 + i * 3 + 1] + '张' + r'</div>'
+            table.append(tmp)
+        c['table'] = json.dumps(table)
         return render(request, 'ticket.html', c)
 
     return render(request, 'ticket.html', c)
 
 def manageRender(request):
-    """
-    if (request.session.get('privilege') != '2'):
-        return redirect('/')
-    """
-    print("ok")
+    if (not request.session.get('uid')):
+        return redirect('/login/')
+
     c = {}
     w = []
     c['uid'] = request.session.get('uid')
+    c['uname'] = request.session.get('uname')
+    c['uprivilege'] = request.session.get('uprivilege')
 
     if (request.method == 'POST'):
         uid = request.POST.get('id')
-        if (not inputchecker.idChecker):
+        if (not inputchecker.trainIdchecker(uid)):
             w.append('id')
         c['message'] = w
         if (w):
@@ -215,8 +244,8 @@ def manageRender(request):
         print('command:' + 'query_train' + ' ' + uid + '\n')
         ret = uclient.post_and_get('query_train' + ' ' + uid + '\n')
         print(ret)
-        return render(request, 'manage.html')
-    return render(request, 'manage.html')
+        return render(request, 'manage.html', c)
+    return render(request, 'manage.html', c)
 
 def personRender(request):
     pass

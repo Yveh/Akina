@@ -11,15 +11,17 @@
         {% endfor %}
     {% endif %}
 </style>
+{% if not querydone %}
+<style type="text/css">
+body {
+    height: 100vh;
+}
+</style>
+{% endif %}
 {% endblock %}
 {% block main %}
 <div class="d-flex align-items-center" id="main">
-    {% if not querydone%}
-    <style type="text/css">
-    body {
-        height: 100vh;
-    }
-    </style>
+    {% if not querydone %}
     <div class="container">
         <div class="box-transparent py-4 px-4">
             <form action="" method="POST">
@@ -76,22 +78,19 @@
         </div>
     </div>
     {% else %}
-    <div class="container">
+    <div class="container" style="margin-top: 6rem">
         <div class="box-transparent py-4 px-4">
             <table id="trainTable" class="display table table-hover" data-toggle="table" data-data="{{ table }}" data-striped="true"
-                data-pagination="true" data-side-pagination="server" data-page-list="[10, 20, 50, 100, 200]" data-search="true"
-                data-mobile-responsive="true" searchOnEnterKey="true" data-show-columns="true" data-show-toggle="true" data-page-size=20>
-                <thead >
+                data-pagination="true" data-side-pagination="client" data-mobile-responsive="true" data-show-columns="true" data-show-toggle="true" data-page-size=10>
+                <thead>
                     <tr>
-                        <th data-field="trainID" data-align="center" data-sortable="true">列车编号</th>
-                        <th data-field="loc1" data-align="center" data-sortable="true">始发站</th>
-                        <th data-field="date1" data-align="center" data-sortable="true">发车日期</th>
-                        <th data-field="time1" data-align="center" data-sortable="true">发车时间</th>
-                        <th data-field="loc2" data-align="center" data-sortable="true">终点站</th>
-                        <th data-field="date2" data-align="center" data-sortable="true">到达日期</th>
-                        <th data-field="time2" data-align="center" data-sortable="true">到达时间</th>
-                        <th data-field="type" data-align="center">类型</th>
-                        <th data-field="price" data-align="center">价格</th>
+                        <th data-field="trainID" data-align="center">列车编号</th>
+                        <th data-field="loc1" data-align="center">始发站</th>
+                        <th data-field="date1" data-align="center">发车日期</th>
+                        <th data-field="time1" data-align="center">发车时间</th>
+                        <th data-field="loc2" data-align="center">终点站</th>
+                        <th data-field="date2" data-align="center">到达日期</th>
+                        <th data-field="time2" data-align="center">到达时间</th>
                         <th data-field="tleft" data-align="center">余票</th>
                         <th data-field="operation" data-align="center">操作</th>
                     </tr>

@@ -55,7 +55,7 @@ if __name__ == "__main__":
         establish_connection()
         msg = client.recv(1048576).decode()
         sys.stderr.write("recieved : " + msg)
-        print(msg)
+        print(msg == 'query_order 2018 2018-03-28 C\n')
         if (msg == 'register 张三 zhangsan zhangsan@sjtu.edu.cn 12345678\n'):
             a = '2018\n'
         elif (msg == 'login 2018 zhangsan\n'):
@@ -72,7 +72,7 @@ if __name__ == "__main__":
             a = 'c101 北京 2018-03-28 08:00 夏威夷 2018-03-28 08:01 一等座 2000 765.50 二等座 2000 765.49 三等座 2000 765.48\nc102 夏威夷 2018-03-28 08:02 上海 2018-03-28 08:03 一等座 2000 765.50 二等座 2000 765.49 三等座 2000 765.48\n'
         elif (msg == 'buy_ticket 6666 1 C101 北京 夏威夷 2018-03-28 一等座\n'):
             a = '1\n'
-        elif (msg == 'query_order 6666 2018-03-28 C\n'):
+        elif (msg == 'query_order 2018 2018-03-28 C\n'):
             a = '1\nc101 北京 2018-03-28 08:00 夏威夷 2018-03-28 08:01 一等座 1 765.50 二等座 0 765.49 三等座 0 765.48\n'
         elif (msg == 'refund_ticket 6666 1 C101 北京 夏威夷 2018-03-28 一等座\n'):
             a = '1\n'
