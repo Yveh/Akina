@@ -1,6 +1,7 @@
 from django.http import HttpResponse 
 from django.shortcuts import render
 from django.shortcuts import redirect
+import json
 
 from . import uclient
 from . import inputchecker
@@ -116,15 +117,39 @@ def trainRender(request):
             return render(request, 'train.html', c)
 
         #TO DO: show the results / buy
+        c['querydone'] = True
+        print(utransfer)
         if (utransfer == 'on'):
             print('command:' + 'query_transfer' + ' ' + uloc1 + ' ' + uloc2 + ' ' + udate + ' ' + uucatalog + '\n')
-            ret = uclient.post_and_get('query_transfer' + ' ' + uloc1 + ' ' + uloc2 + ' ' + udate + ' ' + uucatalog + '\n')
-            print(ret)
+            ret = uclient.post_and_get('query_transfer' + ' ' + uloc1 + ' ' + uloc2 + ' ' + udate + ' ' + uucatalog + '\n').split('\n')
+            """
+            for i in ret:
+                utrain = i.split()
+                for j in utrain:
+                    print(j)
+            """
+            rrr = ret[0].split()
+            print(rrr[1])
             return render(request, 'train.html', c)
         else:
             print('command:' + 'query_ticket' + ' ' + uloc1 + ' ' + uloc2 + ' ' + udate + ' ' + uucatalog + '\n')
-            ret = uclient.post_and_get('query_ticket' + ' ' + uloc1 + ' ' + uloc2 + ' ' + udate + ' ' + uucatalog + '\n')
-            print(ret)
+            ret = uclient.post_and_get('query_ticket' + ' ' + uloc1 + ' ' + uloc2 + ' ' + udate + ' ' + uucatalog + '\n').split('\n')
+            table = []
+            for i in ret:
+                utrain = i.split()
+                if not utrain:
+                    break
+                tmp = {}
+                tmp['trainID'] = utrain[0]
+                tmp['loc1'] = utrain[1]
+                tmp['date1'] = utrain[2]
+                tmp['time1'] = utrain[3]
+                tmp['loc2'] = utrain[4]
+                tmp['date2'] = utrain[5]
+                tmp['time2'] = utrain[6]
+                tmp['operator'] = 'qwq'
+                table.append(tmp)
+            c['table'] = json.dumps(table)
             return render(request, 'train.html', c)
 
     return render(request, 'train.html', c)
