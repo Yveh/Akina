@@ -55,6 +55,7 @@ if __name__ == "__main__":
         establish_connection()
         msg = client.recv(1048576).decode()
         sys.stderr.write("recieved : " + msg)
+        print(msg)
         if (msg == 'register 张三 zhangsan zhangsan@sjtu.edu.cn 12345678\n'):
             a = '2018\n'
         elif (msg == 'login 2018 zhangsan\n'):
@@ -92,6 +93,7 @@ if __name__ == "__main__":
         else:
             a = 'command wrong\n'
 
+        print(a)
         client.send((a).encode("utf-8"))
         close_connection()
 

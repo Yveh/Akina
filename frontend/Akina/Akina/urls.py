@@ -24,5 +24,7 @@ urlpatterns = [
     path(r'train/', view.trainRender),
     path(r'ticket/', view.ticketRender),
     path(r'manage/', view.manageRender),
+    path(r'person/', view.personRender),
+    path(r'logout/', view.logoutRender),
     path(r'base/', view.baseRender),
 ]
