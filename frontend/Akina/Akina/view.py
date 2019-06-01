@@ -248,7 +248,7 @@ def manageRender(request):
     return render(request, 'manage.html', c)
 
 def personRender(request):
-    pass
+    return render(request, 'person.html')
 
 def baseRender(request):
     return render(request, 'base.html')
