@@ -8,7 +8,6 @@
 #include <functional>
 #include <assert.h>
 
-//#define DEBUG
 
 enum NodeType{INTERNAL,LEAF};
 template <class Key,class Data,size_t Nodesize,class Cmp=std::less<Key>>
@@ -39,13 +38,18 @@ private:
 	public:
 		Node(NodeType nodeType = LEAF,Key key0 = Key(),size_t elementNumber = 0,off_t pos = nulloff_t,off_t father = nulloff_t,off_t pre = nulloff_t,off_t nex = nulloff_t) : nodeType(nodeType),key0(key0),pos(pos),elementNumber(elementNumber),father(father),pre(pre),nex(nex){}
 	};
-
+#ifndef DEBUG
 	const size_t N = (Nodesize - sizeof(Node)) / (sizeof(off_t) + sizeof(Key)) - 1;
 	const size_t M = (Nodesize - sizeof(Block)) / (sizeof(Data) + sizeof(Key)) - 1;
+#endif
+#ifdef DEBUG
+	const size_t N = 5;
+	const size_t M = 7;
+	#endif
 
 	Node new_node(NodeType nodetype,const Key &key)
 	{
-		Node *p = new Node(nodetype,key,1,MemoryManager.malloc(Nodesize));
+		Node *p = new Node(nodetype,key,0,MemoryManager.malloc(Nodesize));
 		return *p;
 	}
 	void delete_Node (Node &p)
@@ -78,8 +82,7 @@ private:
 	};
 	Block new_block(const Key &key)
 	{
-		Block *b = new Block(1,key,MemoryManager.malloc(Nodesize));
-
+		Block *b = new Block(0,key,MemoryManager.malloc(Nodesize));
 		return *b;
 	}
 	void delete_block(Block &b)
@@ -105,7 +108,7 @@ private:
 		File.read(reinterpret_cast<char *>(&Root), sizeof(off_t));
 		File.read(reinterpret_cast<char *>(&Head), sizeof(off_t));
 		File.read(reinterpret_cast<char *>(&Tail), sizeof(off_t));
-		File.write(reinterpret_cast<char *>(&ElementNumber),sizeof(size_t));
+		File.read(reinterpret_cast<char *>(&ElementNumber),sizeof(size_t));
 	}
 	void write_bptree_info()
 	{
@@ -117,34 +120,43 @@ private:
 		File.flush();
 	}
 	Node read_node(off_t root) {
-		File.seekg(root);
-		Node *p = new Node;
-		File.read(reinterpret_cast<char *>(p),sizeof(Node));
-		return *p;
+		Node p;
+		File.seekg(root,std::ios::beg);
+		File.read(reinterpret_cast<char *>(&p),sizeof(p));
+		return p;
 	}
 
 	Block read_block(off_t root)
 	{
 		File.seekg(root);
-		Block *b = new Block;
-		File.read(reinterpret_cast<char *>(b),sizeof(Block));
-		return *b;
+		Block b;
+		File.read(reinterpret_cast<char *>(&b),sizeof(Block));
+		return b;
 	}
 	void write_node(Node &p)
 	{
+		File.close();
+		File.open(FileName,std::ios::in|std::ios::out|std::ios::binary);
 		File.seekp(p.pos);
 		File.write(reinterpret_cast<char *>(&p),sizeof(Node));
+		File.flush();
 	}
 	void write_block(Block &b)
 	{
+		File.close();
+		File.open(FileName,std::ios::in|std::ios::out|std::ios::binary);
 		File.seekp(b.pos);
 		File.write(reinterpret_cast<char *>(&b),sizeof(Block));
+		File.flush();
 	}
 
 	void fill_buffer_with_node(char * buffer,const Node &p)
 	{
+        File.close();
+        File.open(FileName,std::ios::in|std::ios::out|std::ios::binary);
 		File.seekg(p.pos + sizeof(Node));
 		File.read(buffer,p.elementNumber * (sizeof(Key) + sizeof(off_t)));
+		File.flush();
 	}
 	void fill_buffer_with_block(char *buffer,const Block &b)
 	{
@@ -153,13 +165,19 @@ private:
 	}
 	void write_buffer_into_node(char *buffer,const Node &p)
 	{
+	    File.close();
+	    File.open(FileName,std::ios::in|std::ios::out|std::ios::binary);
 		File.seekp(p.pos + sizeof(Node));
-		File.write(buffer,p.elementNumber * sizeof(Key) + sizeof(off_t));
+		File.write(buffer,p.elementNumber * (sizeof(Key) + sizeof(off_t)));
+		File.flush();
 	}
 	void write_buffer_into_block(char *buffer,const Block &b)
 	{
+        File.close();
+        File.open(FileName,std::ios::in|std::ios::out|std::ios::binary);
 		File.seekp(b.pos + sizeof(Block));
-		File.write(buffer,b.elementNumber * sizeof(Key) + sizeof(Data));
+		File.write(buffer,b.elementNumber * (sizeof(Key) + sizeof(Data)));
+		File.flush();
 	}
 	off_t * pos_n_in_node(int n,char * buffer)
 	{
@@ -177,31 +195,13 @@ private:
 	{
 		return reinterpret_cast<Key *>(buffer + n * sizeof(Key) + n * sizeof(Data));
 	}
-	//return n where key_n is the greatest key number no more than key.
-//	int search_rank_in_node(const Key &key,const Node &p,char * buffer)
-//	{
-//		int l = -1,r = p.elementNumber;
-//		while (l < r - 1)
-//		{
-//			int m = (l + r) >> 1;
-//			Key tmp = key_n_in_node(m,buffer);
-//			if (IsEqual(tmp,key))
-//				return m;
-//			else{
-//				if (Cmp1(tmp,key))
-//					l = m;
-//				else
-//					r = m;
-//			}
-//		}
-//		return l;
-//	}
-    size_t search_rank_in_node_lowerbound(const Key &key,const Node &p,char * const buffer,std::function<bool(const Key &,const Key &)>CMP = Cmp())
+    //It's actually lowerbound - 1;
+    int search_rank_in_node_lowerbound(const Key &key,const Node &p,char * const buffer,std::function<bool(const Key &,const Key &)>CMP = Cmp())
     {
-        size_t l = -1,r = p.elementNumber;
+        int l = -1,r = p.elementNumber;
         while (l < r - 1)
         {
-            size_t m = (l + r) >> 1;
+            int m = (l + r) >> 1;
             Key tmp = *key_n_in_node(m,buffer);
             if (CMP(tmp,key))
                 l = m;
@@ -210,12 +210,12 @@ private:
         }
         return l;
     }
-    size_t search_rank_in_node_upperbound(const Key &key,const Node &p,char * const buffer,std::function<bool(const Key &,const Key &)>CMP = Cmp())
+    int search_rank_in_node_upperbound(const Key &key,const Node &p,char * const buffer,std::function<bool(const Key &,const Key &)>CMP = Cmp())
     {
-        size_t l = -1,r = p.elementNumber;
+        int  l = -1,r = p.elementNumber;
         while (l < r - 1)
         {
-            size_t m = (l + r) >> 1;
+            int m = (l + r) >> 1;
             Key tmp = *key_n_in_node(m,buffer);
             if (!CMP(key,tmp))
                 l = m;
@@ -224,30 +224,12 @@ private:
         }
         return l;
     }
-//	int search_rank_in_block(const Key &key,const Block &b,char *buffer)
-//	{
-//		int l = -1,r = b.elementNumber;
-//		while (l < r - 1)
-//		{
-//			int m = (l + r) >> 1;
-//			Key tmp = key_n_in_block(m,buffer);
-//			if (IsEqual(tmp,key))
-//				return m;
-//			else{
-//				if (Cmp1(tmp,key))
-//					l = m;
-//				else
-//					r = m;
-//			}
-//		}
-//		return l;
-//	}
-    size_t search_rank_in_block_lowerbound(const Key &key,const Block &b,char * const buffer,std::function<bool(const Key &,const Key &)>CMP = Cmp())
+    int search_rank_in_block_lowerbound(const Key &key,const Block &b,char * const buffer,std::function<bool(const Key &,const Key &)>CMP = Cmp())
     {
-        size_t l = -1,r = b.elementNumber;
+        int l = -1,r = b.elementNumber;
         while (l < r - 1)
         {
-            size_t m = (l + r) >> 1;
+            int m = (l + r) >> 1;
             Key tmp = *key_n_in_block(m,buffer);
             if (CMP(tmp,key))
                 l = m;
@@ -256,12 +238,12 @@ private:
         }
         return l;
     }
-    size_t search_rank_in_block_upperbound(const Key &key,const Block &b,char * const buffer,std::function<bool(const Key &,const Key &)>CMP = Cmp())
+    int search_rank_in_block_upperbound(const Key &key,const Block &b,char * const buffer,std::function<bool(const Key &,const Key &)>CMP = Cmp())
     {
-        size_t l = -1,r = b.elementNumber;
+        int l = -1,r = b.elementNumber;
         while (l < r - 1)
         {
-            size_t m = (l + r) >> 1;
+            int m = (l + r) >> 1;
             Key tmp = *key_n_in_block(m,buffer);
             if (!CMP(key,tmp))
                 l = m;
@@ -275,8 +257,13 @@ private:
 	{
 		char buffer[Nodesize];
 		fill_buffer_with_block(buffer,b);
+//#ifdef DEBUG
+//		std::cout << "Block before insert: ";
+//        for (int i = 0; i < b.elementNumber ; ++i)
+//            std::cout << i << " " << *key_n_in_block(i,buffer) << " " << *data_n_in_block(i,buffer) << "\n";
+//		#endif
 		int n = search_rank_in_block_lowerbound(key,b,buffer);
-		if (n >= 0 && n < b.elementNumber && (IsEqual(*key_n_in_block(n,buffer),key)))
+		if (n + 1 >= 0 && n + 1 < b.elementNumber && (IsEqual(*key_n_in_block(n + 1,buffer),key)))
 			return 0;
 		for (int i = b.elementNumber - 1; i > n; --i)
 		{
@@ -285,11 +272,71 @@ private:
 		}
 		*data_n_in_block(n + 1,buffer) = data;
 		*key_n_in_block(n + 1,buffer) = key;
+
 		if (n == -1)
-			b.key0 = key;
+        {
+		    Key prekey = b.key0;
+		    b.key0 = key;
+		    write_block(b);
+		    off_t fa_off = b.father;
+		    int n1 = n;
+		    while (n1 == -1)
+            {
+                Node fa = read_node(fa_off);
+                if (fa.elementNumber == 0)
+                    break;
+                char buffer1[Nodesize];
+                fill_buffer_with_node(buffer1,fa);
+                n1 = search_rank_in_node_lowerbound(prekey,fa,buffer1);
+                *key_n_in_node(n1 + 1,buffer1) = key;
+                write_buffer_into_node(buffer1,fa);
+                if (n1 == -1)
+                {
+                    fa.key0 = key;
+                    write_node(fa);
+                    fa_off = fa.father;
+                    if (fa_off == nulloff_t)
+                        break;
+                }
+            }
+//		    Node tmp = read_node(b.father);
+//		    if (tmp.elementNumber)
+//            {
+//                char buffer1[Nodesize];
+//                fill_buffer_with_node(buffer1,tmp);
+//                int n1 = search_rank_in_node_lowerbound(b.key0,tmp,buffer1);
+//                b.key0 = key;
+//                    *key_n_in_node(n1 + 1,buffer1) = key;
+//                    write_buffer_into_node(buffer1,tmp);
+//                while(n1 == -1)
+//                {
+//                    tmp.key0 = key;
+//                    write_node(tmp);
+//                    if (tmp.father == nulloff_t)
+//                        break;
+//                    Node np = tmp;
+//                    tmp = read_node(tmp.father);
+//                    fill_buffer_with_node(buffer1,tmp);
+//                    n1 = search_rank_in_node_lowerbound(np.key0,tmp,buffer1);
+//                }
+//                /*if (n1 == -1)
+//                {
+//                    tmp.key0 = key;
+//                    write_node(tmp);
+//                }*/
+//            }
+//            else
+//                b.key0 = key;
+
+        }
+//#ifdef DEBUG
+//        std::cout << "Block after insert: ";
+//        for (int i = 0; i <= b.elementNumber ; ++i)
+//            std::cout << i << " " << *key_n_in_block(i,buffer) << " " << *data_n_in_block(i,buffer) << "\n";
+//#endif
 		if (++b.elementNumber > M)
 		{
-			Block b2 = new_block(*key_n_in_block((M >> 1) + 1,buffer));
+			Block b2 = Block(0,*key_n_in_block((M >> 1) + 1,buffer),MemoryManager.malloc(Nodesize));
 			b2.father = b.father;
 			b2.pre = b.pos;
 			b2.nex = b.nex;
@@ -300,6 +347,8 @@ private:
 				b3.pre = b2.pos;
 				write_block(b3);
 			}
+			else
+				Tail = b2.pos;
 			b2.key0 = *key_n_in_block((M >> 1) + 1,buffer);
 			b2.elementNumber = M - (M >> 1);
 			b.elementNumber = (M >> 1) + 1;
@@ -310,11 +359,16 @@ private:
 				*data_n_in_block(i - (M >> 1) - 1,buffer2) = *data_n_in_block(i,buffer);
 				*key_n_in_block(i - (M >> 1) - 1,buffer2) = *key_n_in_block(i,buffer);
 			}
-			write_buffer_into_block(buffer2,b2);
 			write_block(b2);
+			write_buffer_into_block(buffer2,b2);
 			Node p = read_node(b.father);
 			node_insert(p,b2.key0,b2.pos);
 		}
+//#ifdef DEBUG
+//        std::cout << "Block after insert adjust: ";
+//        for (int i = 0; i < b.elementNumber ; ++i)
+//            std::cout << i << " " << *key_n_in_block(i,buffer) << " " << *data_n_in_block(i,buffer) << "\n";
+//#endif
 		write_buffer_into_block(buffer,b);
 		write_block(b);
 		return 1;
@@ -323,6 +377,11 @@ private:
 	{
 		char buffer[Nodesize];
 		fill_buffer_with_node(buffer,p);
+//#ifdef DEBUG
+//        std::cout << "Node before insert : ";
+//        for (int i = 0; i < p.elementNumber ; ++i)
+//            std::cout << i << " " << *key_n_in_node(i,buffer) << " " << *pos_n_in_node(i,buffer) << "\n";
+//#endif
 		int n = search_rank_in_node_lowerbound(key,p,buffer);
 //		if (n >= 0 && n < p.elementNumber && *key_n_in_node(n) == key)
 //			return 0;
@@ -333,11 +392,59 @@ private:
 		}
 		*pos_n_in_node(n + 1,buffer) = pos;
 		*key_n_in_node(n + 1,buffer) = key;
-		if (n == -1)
-			p.key0 = key;
+        if (n == -1)
+        {
+            Key prekey = p.key0;
+            p.key0 = key;
+            write_node(p);
+            off_t fa_off = p.father;
+            int n1 = n;
+            while (n1 == -1 && fa_off != nulloff_t)
+            {
+                Node fa = read_node(fa_off);
+                if (fa.elementNumber == 0)
+                    break;
+                char buffer1[Nodesize];
+                fill_buffer_with_node(buffer1,fa);
+                n1 = search_rank_in_node_lowerbound(prekey,fa,buffer1);
+                *key_n_in_node(n1 + 1,buffer1) = key;
+                write_buffer_into_node(buffer1,fa);
+                if (n1 == -1)
+                {
+                    fa.key0 = key;
+                    write_node(fa);
+                    fa_off = fa.father;
+                }
+            }
+        }
+//		if (n == -1)
+//        {
+//		    if (p.father == nulloff_t)
+//		        p.key0 = key;
+//		    else
+//            {
+//                Node tmp = read_node(p.father);
+//                char buffer1[Nodesize];
+//                fill_buffer_with_node(buffer1,tmp);
+//                int n1 = search_rank_in_node_lowerbound(p.key0,tmp,buffer1);
+//                p.key0 = key;
+//                *key_n_in_node(n1 + 1,buffer1) = key;
+//                if (n1 == -1)
+//                {
+//                    tmp.key0 = key;
+//                    write_node(tmp);
+//                }
+//                write_buffer_into_node(buffer1,tmp);
+//            }
+//        }
+//#ifdef DEBUG
+//        std::cout << "Node after insert : ";
+//        for (int i = 0; i <= p.elementNumber ; ++i)
+//            std::cout << i << " " << *key_n_in_node(i,buffer) << " " << *pos_n_in_node(i,buffer) << "\n";
+//#endif
 		if (++p.elementNumber > N)
 		{
-			Node p2 = new_node(p.nodeType,*key_n_in_node((M >> 1) + 1,buffer));
+			Node p2 = Node(p.nodeType,*key_n_in_node((M >> 1) + 1,buffer),0,MemoryManager.malloc(Nodesize));
 			p2.father = p.father;
 			p2.pre = p.pos;
 			p2.nex = p.nex;
@@ -367,7 +474,7 @@ private:
 			}
 			else
 			{
-				Node newroot = new_node(INTERNAL,p.key0);
+				Node newroot = Node(INTERNAL,p.key0,0,MemoryManager.malloc(Nodesize));
 				p.father = p2.father = Root = newroot.pos;
 				newroot.elementNumber = 2;
 				newroot.key0 = p.key0;
@@ -382,6 +489,11 @@ private:
 				write_bptree_info();
 			}
 		}
+//#ifdef DEBUG
+//        std::cout << "Node after insert adjust: ";
+//        for (int i = 0; i < p.elementNumber ; ++i)
+//            std::cout << i << " " << *key_n_in_node(i,buffer) << " " << *pos_n_in_node(i,buffer) << "\n";
+//#endif
 		write_buffer_into_node(buffer,p);
 		write_node(p);
 	}
@@ -584,15 +696,45 @@ private:
 		char buffer[Nodesize];
 		fill_buffer_with_block(buffer,b);
 		int n = search_rank_in_block_lowerbound(key,b,buffer);
-		if (n == -1 || !IsEqual(key,*key_n_in_block(n,buffer)))
+		if (n == b.elementNumber - 1 || !IsEqual(key,*key_n_in_block(n + 1,buffer)))
 			return 0;
-		for (int i = n; i < b.elementNumber - 1; ++i)
+		for (int i = n + 1; i < b.elementNumber - 1; ++i)
 		{
 			*data_n_in_block(i,buffer) = *data_n_in_block(i + 1,buffer);
 			*key_n_in_block(i,buffer) = *key_n_in_block(i + 1,buffer);
 		}
-		if (n == 0)
-			b.key0 = *key_n_in_block(0,buffer);
+        if (n == -1)
+        {
+            Key prekey = b.key0;
+            Key key_changeto = b.key0 = *key_n_in_block(0,buffer);
+            write_block(b);
+            off_t fa_off = b.father;
+            int n1 = n;
+            while (n1 == -1)
+            {
+                Node fa = read_node(fa_off);
+                if (fa.elementNumber == 0)
+                    break;
+                char buffer1[Nodesize];
+                fill_buffer_with_node(buffer1,fa);
+                n1 = search_rank_in_node_lowerbound(prekey,fa,buffer1);
+                *key_n_in_node(n1 + 1,buffer1) = key_changeto;
+                write_buffer_into_node(buffer1,fa);
+                if (n1 == -1)
+                {
+                    fa.key0 = key;
+                    write_node(fa);
+                    fa_off = fa.father;
+                    if (fa_off == nulloff_t)
+                        break;
+                }
+            }
+        }
+//		if (n == -1)
+//        {
+//			b.key0 = *key_n_in_block(0,buffer);
+//		    //tobe change
+//        }
 		if (--b.elementNumber < (M + 1) >> 1 && ElementNumber > M)
 		{
 			if (b.nex == nulloff_t)
@@ -648,6 +790,8 @@ private:
 				return 1;
 			}
 		}
+		write_block(b);
+		write_buffer_into_block(buffer,b);
 		return 1;
 	}
 	int find_subtree(const Key &key,Data &data,off_t nowroot)
@@ -656,17 +800,24 @@ private:
 		char buffer[Nodesize];
 		fill_buffer_with_node(buffer,p);
 		int n = search_rank_in_node_lowerbound(key,p,buffer);
+        if (n + 1 < p.elementNumber && IsEqual(key,*key_n_in_node(n + 1,buffer)))
+            ++n;
+        if (n == -1)
+            return 0;
 		if (p.nodeType == LEAF)
 		{
 			Block b = read_block(*pos_n_in_node(n,buffer));
 			fill_buffer_with_block(buffer,b);
 			int n = search_rank_in_block_lowerbound(key,b,buffer);
-			if (n == -1)
-				return 0;
-			else {
-				data = *data_n_in_block(n,buffer);
-				return 1;
-			}
+			if (n == b.elementNumber - 1)
+			    return 0;
+            if (IsEqual(key,*key_n_in_block(n + 1,buffer)))
+            {
+                data = *data_n_in_block(n + 1,buffer);
+                return 1;
+            }
+            else
+                return 0;
 		}
 		else
 			return find_subtree(key,data,*pos_n_in_node(n,buffer));
@@ -677,45 +828,60 @@ private:
 		char buffer[Nodesize];
 		fill_buffer_with_node(buffer,p);
 		int n = search_rank_in_node_lowerbound(key,p,buffer);
+		if (n + 1 < p.elementNumber && IsEqual(key,*key_n_in_node(n + 1,buffer)))
+			++n;
+		if (n == -1)
+			return 0;
 		if (p.nodeType == LEAF)
 		{
 			Block b = read_block(*pos_n_in_node(n,buffer));
 			fill_buffer_with_block(buffer,b);
 			int n = search_rank_in_block_lowerbound(key,b,buffer);
-			if (n == -1)
+			if (n == b.elementNumber - 1)
 				return 0;
-			else {
-				*data_n_in_block(n,buffer) = data;
+			if (IsEqual(key,*key_n_in_block(n + 1,buffer)))
+			{
+				*data_n_in_block(n + 1,buffer) = data;
 				write_buffer_into_block(buffer,b);
 				return 1;
 			}
+			else
+				return 0;
 		}
 		else
 			return modify_subtree(key,data,*pos_n_in_node(n,buffer));
 	}
-	int insert_subtree(const Key &key,const Data &data,Node &root)
+	int insert_subtree(const Key &key,const Data &data,Node &root,off_t pa)
 	{
+	    root.father = pa;
+	    write_node(root);
 		char buffer[Nodesize];
 		fill_buffer_with_node(buffer,root);
 		int n = search_rank_in_node_lowerbound(key,root,buffer);
+		if (n + 1 >= 0 && n + 1 < root.elementNumber && IsEqual(key,*key_n_in_node(n + 1,buffer)))
+			return 0;
 		if (root.nodeType == LEAF)
 		{
+			Block b;
 			if (n == -1)
-			{
-				Block b = read_block(*pos_n_in_node(0,buffer));
-				return block_insert(b,key,data);
-			}
+				b = read_block(*pos_n_in_node(0,buffer));
 			else
-			{
-
-				Block b = read_block(*pos_n_in_node(n,buffer));
-				return block_insert(b,key,data);
-			}
+				b = read_block(*pos_n_in_node(n,buffer));
+			b.father = root.pos;
+			int tmp = block_insert(b,key,data);
+			root.elementNumber += tmp;
+			return tmp;
 		}
 		else
 		{
-			Node p = read_node(*pos_n_in_node(n,buffer));
-			return insert_subtree(key,data,p);
+            Node p;
+		    if (n == -1)
+		        p = read_node(*pos_n_in_node(0,buffer));
+		    else
+			    p = read_node(*pos_n_in_node(n,buffer));
+			int tmp = insert_subtree(key,data,p,root.pos);
+			root.elementNumber += tmp;
+			return tmp;
 		}
 	}
 	int erase_subtree(const Key &key,Node root)
@@ -723,6 +889,8 @@ private:
 		char buffer[Nodesize];
 		fill_buffer_with_node(buffer,root);
 		int n = search_rank_in_node_lowerbound(key,root,buffer);
+        if (n + 1 < root.elementNumber && IsEqual(key,*key_n_in_node(n + 1,buffer)))
+            ++n;
 		if (root.nodeType == LEAF)
 		{
 			if (n == -1)
@@ -801,53 +969,124 @@ private:
     }
     int askarr_subtree(const Key &key,std::function<bool(const Key &,const Key &)>CMP,sjtu::vector<Key> &vect1,sjtu::vector<Data> &vect2,Node &p)
     {
+//#ifdef DEBUG
+//        std::cout << "key.fisrt,key.,second,nkey.first,nkey.second" << key.first << " " << key.second << " " << p.key0.first << " " << p.key0.second <<"\n";
+//        std::cout << "p.nodeType "<< p.nodeType <<"\n";
+//#endif
         char buffer[Nodesize];
         fill_buffer_with_node(buffer,p);
-        off_t bg,ed;
-        size_t bgn,edn;
-        search_arr_in_subtree(bg,ed,bgn,edn,key,CMP,p);
-        if (bg == ed && bgn == edn)
+        int n = search_rank_in_node_lowerbound(key,p,buffer,CMP);
+//        if (n + 1 < p.elementNumber && !CMP(key,*key_n_in_node(n + 1,buffer)) && !CMP(*key_n_in_node(n + 1,buffer),key))
+//            ++n;
+        if (n == -1 && !(!CMP(key,*key_n_in_node(n + 1,buffer)) && !CMP(*key_n_in_node(n + 1,buffer),key)))
             return 0;
-        Block b = read_block(bgn);
-        char buffer2[Nodesize];
-        fill_buffer_with_block(buffer2,b);
-        if (bg == ed)
+		else
+		{
+			if (n == -1)
+				n = 0;
+		}
+        if (p.nodeType == LEAF)
         {
-            for (size_t i = 0; i + bgn != edn; ++i)
+            Block b = read_block(*pos_n_in_node(n,buffer));
+            fill_buffer_with_block(buffer,b);
+            int n = search_rank_in_block_lowerbound(key,b,buffer,CMP);
+            if (n == b.elementNumber - 1)
+			{
+            	if (b.nex == nulloff_t)
+            		return 0;
+				b = read_block(b.nex);
+				fill_buffer_with_block(buffer,b);
+				n = -1;
+			}
+            if (!CMP(key,*key_n_in_block(n + 1,buffer)) && !CMP(*key_n_in_block(n + 1,buffer),key))
             {
-                vect1.push_back(*key_n_in_block(i + bgn,buffer2));
-                vect2.push_back(*data_n_in_block(i + bgn,buffer2));
+                Block nb = b;
+                off_t nele = n + 1;
+                char * nBuffer = buffer;
+//                #ifdef DEBUG
+//                std::cout << "key.fisrt,key.,second,nkey.first,nkey.second,data:\n" << key.first << " " << key.second << " " << (*key_n_in_block(nele,nBuffer)).first << " " << (*key_n_in_block(nele,nBuffer)).second << " " << *data_n_in_block(nele,nBuffer) << "\n";
+//#endif
+                while (!CMP(key,*key_n_in_block(nele,nBuffer)) && !CMP(*key_n_in_block(nele,nBuffer),key))
+                {
+//#ifdef DEBUG
+//                    std::cout << "key" <<  (*key_n_in_block(nele,nBuffer)).first << " " << (*key_n_in_block(nele,nBuffer)).second;
+//                    #endif
+                    vect1.push_back(*key_n_in_block(nele,nBuffer));
+//					#ifdef DEBUG
+//					std::cout << "data:\n" << *data_n_in_block(nele,nBuffer) << "\n";
+//                	#endif
+                    vect2.push_back(*data_n_in_block(nele,nBuffer));
+//#ifdef DEBUG
+//                    std::cout << "!!!? " << vect2[0] << "\n";
+//#endif
+                    ++nele;
+                    if (nele == nb.elementNumber)
+                    {
+                        if (nb.nex != nulloff_t)
+                        {
+                            nb = read_block(nb.nex);
+                            fill_buffer_with_block(nBuffer,nb);
+                            nele = 0;
+                        }
+                        else
+                            break;
+                    }
+                }
+                return 1;
             }
-            return 1;
+            else
+                return 0;
         }
-        for (size_t i = 0; i + bgn != b.elementNumber; ++i)
+        else
         {
-            vect1.push_back(*key_n_in_block(i + bgn,buffer2));
-            vect2.push_back(*data_n_in_block(i + bgn,buffer2));
+            Node son = read_node(*pos_n_in_node(n,buffer));
+            return askarr_subtree(key,CMP,vect1,vect2,son);
         }
-        while (b.nex != ed)
-        {
-            b = read_block(b.nex);
-            char buffer2[Nodesize];
-            fill_buffer_with_block(buffer2,b);
-            for (size_t i = 0; i < b.elementNumber; ++i)
-            {
-                vect1.push_back(*key_n_in_block(i + bgn,buffer2));
-                vect2.push_back(*data_n_in_block(i + bgn,buffer2));
-            }
-        }
-        if (ed != nulloff_t)
-        {
-            b = read_block(ed);
-            char buffer2[Nodesize];
-            fill_buffer_with_block(buffer2,b);
-            for (size_t i = 0; i < edn; ++i)
-            {
-                vect1.push_back(*key_n_in_block(i + bgn,buffer2));
-                vect2.push_back(*data_n_in_block(i + bgn,buffer2));
-            }
-        }
-        return 1;
+//        off_t bg,ed;
+//        size_t bgn,edn;
+//        search_arr_in_subtree(bg,ed,bgn,edn,key,CMP,p);
+//        if (bg == ed && bgn == edn)
+//            return 0;
+//        Block b = read_block(bgn);
+//        char buffer2[Nodesize];
+//        fill_buffer_with_block(buffer2,b);
+//        if (bg == ed)
+//        {
+//            for (size_t i = 0; i + bgn != edn; ++i)
+//            {
+//                vect1.push_back(*key_n_in_block(i + bgn,buffer2));
+//                vect2.push_back(*data_n_in_block(i + bgn,buffer2));
+//            }
+//            return 1;
+//        }
+//        for (size_t i = 0; i + bgn != b.elementNumber; ++i)
+//        {
+//            vect1.push_back(*key_n_in_block(i + bgn,buffer2));
+//            vect2.push_back(*data_n_in_block(i + bgn,buffer2));
+//        }
+//        while (b.nex != ed)
+//        {
+//            b = read_block(b.nex);
+//            char buffer2[Nodesize];
+//            fill_buffer_with_block(buffer2,b);
+//            for (size_t i = 0; i < b.elementNumber; ++i)
+//            {
+//                vect1.push_back(*key_n_in_block(i + bgn,buffer2));
+//                vect2.push_back(*data_n_in_block(i + bgn,buffer2));
+//            }
+//        }
+//        if (ed != nulloff_t)
+//        {
+//            b = read_block(ed);
+//            char buffer2[Nodesize];
+//            fill_buffer_with_block(buffer2,b);
+//            for (size_t i = 0; i < edn; ++i)
+//            {
+//                vect1.push_back(*key_n_in_block(i + bgn,buffer2));
+//                vect2.push_back(*data_n_in_block(i + bgn,buffer2));
+//            }
+//        }
+//        return 1;
     }
 public:
 	BPlusTree(const std::string &FName,const std::string &MMFName){
@@ -856,6 +1095,7 @@ public:
 		File.open(FName,std::ios::in|std::ios::binary);
 		if (!File.is_open())
 		{
+			File.close();
 			File.open(FName,std::ios::in|std::ios::out|std::ios::binary);
 			MemoryManager.write_info();
 			Clear();
@@ -863,9 +1103,9 @@ public:
 		else
 		{
 			MemoryManager.read_info();
+			read_bptree_info();
 			File.close();
 			File.open(FName,std::ios::in|std::ios::out|std::ios::binary);
-			read_bptree_info();
 		}
 	}
 	~BPlusTree(){
@@ -885,27 +1125,33 @@ public:
 		if (Root == nulloff_t)
 			return 0;
         Node p = read_node(Root);
-		return ElementNumber -= erase_subtree(key,p);
+        int res = erase_subtree(key,p);
+		ElementNumber -= res;
+		return res;
 	}
 
 	int Insert(const Key &key,const Data &data)
 	{
 		if(Root == nulloff_t)
 		{
-			Node p = new_node(LEAF,key);
-			Block b = new_block(key);
+			Node p = Node(LEAF,key,0,MemoryManager.malloc(Nodesize));
+			Block b = Block(0,key,MemoryManager.malloc(Nodesize));
+			b.father = Root = p.pos;
 			block_insert(b,key,data);
-			char buffer1[Nodesize];
-			fill_buffer_with_node(buffer1,p);
 			node_insert(p,key,b.pos);
-			Root = p.pos;
 			Head = Tail = b.pos;
 			write_bptree_info();
 			ElementNumber = 1;
 			return 1;
 		}
         Node p = read_node(Root);
-		return ElementNumber += insert_subtree(key,data,p);
+//#ifdef DEBUG
+//        std::cout << "NdTp" << p.nodeType << "\n";
+//#endif
+		int tmp = insert_subtree(key,data,p,nulloff_t);
+		ElementNumber += tmp;
+		write_bptree_info();
+		return tmp;
 	}
 	int Modify(const Key &key,const Data &data)
 	{
@@ -921,6 +1167,11 @@ public:
         return askarr_subtree(key,CMP,vect1,vect2,p);
 	}
 
+	int Size()
+    {
+	    return ElementNumber;
+    }
+
 	void Clear()
 	{
 		File.close();
@@ -928,13 +1179,16 @@ public:
 		MemoryManager.clear();
 		MemoryManager.write_info();
 		Root = Head = Tail = nulloff_t;
+		ElementNumber = 0;
 		write_bptree_info();
 	}
 
 #ifdef DEBUG
 	void printinfo()
 	{
+		std::cout << "NowBptreeInfo\n";
 		std::cout << Root << " " << Head << " " << Tail << " " << ElementNumber << "\n";
+		std::cout.flush();
 	}
 #endif
 };
