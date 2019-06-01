@@ -26,9 +26,27 @@ body {
             <div class="row">
                 <div class="col">
                     <div class="form-group">
+                        <input type="text" name="username" class="form-control"
+                            placeholder="Username" id="inputUsername" value="{{ uname }}">
+                        <label for="inputUsername">Username</label>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
                         <input type="email" name="email" class="form-control"
-                            placeholder="Email address" id="inputEmail" value="{{ uemail }}" required>
+                            placeholder="Email address" id="inputEmail" value="{{ uemail }}">
                         <label for="inputEmail">Email address</label>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <input type="text" name="phone" class="form-control" placeholder="Phone"
+                            id="inputPhone" value="{{ uphone }}">
+                        <label for="inputPhone">Phone</label>
                     </div>
                 </div>
             </div>
@@ -45,26 +63,8 @@ body {
                 <div class="col">
                     <div class="form-group">
                         <input type="password" name="npassword" class="form-control"
-                            placeholder="New Password" id="inputNewPassword" required>
+                            placeholder="New Password" id="inputNewPassword">
                         <label for="inputNewPassword">New Password</label>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col">
-                    <div class="form-group">
-                        <input type="text" name="username" class="form-control"
-                            placeholder="Username" id="inputUsername" value="{{ uname }}"required>
-                        <label for="inputUsername">Username</label>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col">
-                    <div class="form-group">
-                        <input type="text" name="phone" class="form-control" placeholder="Phone"
-                            id="inputPhone" value="{{ uphone }}" required>
-                        <label for="inputPhone">Phone</label>
                     </div>
                 </div>
             </div>

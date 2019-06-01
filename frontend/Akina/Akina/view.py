@@ -34,8 +34,8 @@ def loginRender(request):
             c['message'] = w
             if (w):
                 return render(request, 'login.html', c)
-            print('command' + ' ' + 'register' + ' ' + uname + ' ' + upassword + ' ' + uemail + ' ' + uphone + '\n')
-            ret = uclient.post_and_get('command' + ' ' + 'register' + ' ' + uname + ' ' + upassword + ' ' + uemail + ' ' + uphone + '\n')
+            print('command:' + 'register' + ' ' + uname + ' ' + upassword + ' ' + uemail + ' ' + uphone + '\n')
+            ret = uclient.post_and_get('register' + ' ' + uname + ' ' + upassword + ' ' + uemail + ' ' + uphone + '\n')
             if (ret != '1\n'):
                 w.append('inputUsernameR')
                 w.append('inputPasswordR')
@@ -62,7 +62,7 @@ def loginRender(request):
                 c['message'] = w
                 return render(request, 'login.html', c)
             else:
-                print('cmmand:' + 'query_profile' + ' ' + uid + '\n')
+                print('command:' + 'query_profile' + ' ' + uid + '\n')
                 ret = uclient.post_and_get('query_profile' + ' ' + uid + '\n').split()
                 print(ret)
                 request.session['uid'] = uid
@@ -70,6 +70,7 @@ def loginRender(request):
                 request.session['uemail'] = ret[1]
                 request.session['uphone'] = ret[2]
                 request.session['uprivilege'] = ret[3]
+                request.session['upassword'] = upassword
                 return redirect('/train/')
     
     return render(request, 'login.html', c)
@@ -83,7 +84,10 @@ def trainRender(request):
     c = {}
     w = []
     c['uid'] = request.session.get('uid')
+    c['upassword'] = request.session.get('upassword')
     c['uname'] = request.session.get('uname')
+    c['uphone'] = request.session.get('uphone')
+    c['uemail'] = request.session.get('uemail')
     c['uprivilege'] = request.session.get('uprivilege')
 
     if (request.method == 'POST'):
@@ -175,7 +179,10 @@ def ticketRender(request):
     c = {}
     w = []
     c['uid'] = request.session.get('uid')
+    c['upassword'] = request.session.get('upassword')
     c['uname'] = request.session.get('uname')
+    c['uphone'] = request.session.get('uphone')
+    c['uemail'] = request.session.get('uemail')
     c['uprivilege'] = request.session.get('uprivilege')
     
     if (request.method == 'POST'):
@@ -229,12 +236,15 @@ def manageRender(request):
     c = {}
     w = []
     c['uid'] = request.session.get('uid')
+    c['upassword'] = request.session.get('upassword')
     c['uname'] = request.session.get('uname')
+    c['uphone'] = request.session.get('uphone')
+    c['uemail'] = request.session.get('uemail')
     c['uprivilege'] = request.session.get('uprivilege')
 
     if (request.method == 'POST'):
         uid = request.POST.get('id')
-        if (not inputchecker.trainIdchecker(uid)):
+        if (not inputchecker.trainIdChecker(uid)):
             w.append('id')
         c['message'] = w
         if (w):
@@ -248,7 +258,67 @@ def manageRender(request):
     return render(request, 'manage.html', c)
 
 def personRender(request):
-    return render(request, 'person.html')
+    if (not request.session.get('uid')):
+        return redirect('/login/')
+    
+    c = {}
+    w = []
+
+    c['uid'] = request.session.get('uid')
+    c['upassword'] = request.session.get('upassword')
+    c['uname'] = request.session.get('uname')
+    c['uphone'] = request.session.get('uphone')
+    c['uemail'] = request.session.get('uemail')
+    c['uprivilege'] = request.session.get('uprivilege')
+
+    if (request.method == 'POST'):
+        uid = request.session.get('uid')
+        uname = request.POST.get('username')
+        if (uname == ''):
+            uname = request.session.get('uname')
+        uopassword = request.POST.get('opassword')
+        unpassword = request.POST.get('npassword')
+        print(unpassword)
+        if (unpassword == ''):
+            unpassword = request.session.get('upassword')
+        uemail = request.POST.get('email')
+        if (uemail == ''):
+            uemail = request.session.get('uemail')
+        uphone = request.POST.get('phone')
+        if (uphone == ''):
+            uphone = request.session.get('uphone')
+
+        if (not inputchecker.nameChecker(uname)):
+            w.append('inputUsername')
+        if (not inputchecker.passwordChecker(uopassword)):
+            w.append('inputoPassword')
+        if (not inputchecker.passwordChecker(unpassword)):
+            w.append('inputnPassword')
+        if (not inputchecker.emailChecker(uemail)):
+            w.append('inputEmail')
+        if (not inputchecker.phoneChecker(uphone)):
+            w.append('inputPhone')
+        c['message'] = w
+        if (w):
+            return render(request, 'person.html', c)
+        print('command:' + 'login' + ' ' + uid + ' ' + uopassword + '\n')
+        ret = uclient.post_and_get('login' + ' ' + uid + ' ' + uopassword + '\n')
+        if (ret != '1\n'):
+            w.append('inputoPassword')
+        c['message'] = w
+        if (w):
+            return render(request, 'pperson.html', c)
+        print('command:' + 'modify_profile' + ' ' + uid + ' ' + uname + ' ' + unpassword + ' ' + uemail + ' ' + uphone + '\n')
+        ret = uclient.post_and_get('modify_profile' + ' ' + uid + ' ' + uname + ' ' + unpassword + ' ' + uemail + ' ' + uphone + '\n')
+        request.session['uname'] = uname
+        request.session['uemail'] = uemail
+        request.session['uphone'] = uphone
+        c['uname'] = request.session.get('uname')
+        c['uphone'] = request.session.get('uphone')
+        c['uemail'] = request.session.get('uemail')
+        render(request, 'person.html', c)
+
+    return render(request, 'person.html', c)
 
 def baseRender(request):
     return render(request, 'base.html')
