@@ -1,6 +1,3 @@
-//
-// Created by 18146 on 2019/5/3.
-//
 #pragma once
 #ifndef AKINA_BASICSTRUCT_HPP
 #define AKINA_BASICSTRUCT_HPP
@@ -9,16 +6,21 @@
 #include <ostream>
 #include "BasicString.hpp"
 #include "vector.hpp"
+#include "FileManager.hpp"
+
+const bool OnKey=false;
+const bool OnKey2=false;
+
 struct USER
 {
-	size_t Id=0;
-	int Priv=0;
+	short Priv=0;
 	String<40> Name;
 	String<20> Passwd,Email,Phone;
-};//todo:remove ID in struct
+};
 struct StationKey
 {
 	String<20> Loc,TrainId;
+	char Catalog;
 };//stationvalue==pos(short)
 bool operator<(const StationKey &l,const StationKey &r)
 {
@@ -27,49 +29,95 @@ bool operator<(const StationKey &l,const StationKey &r)
 	if (x>0) return false;
 	return l.TrainId<r.TrainId;
 }
+struct station
+{
+    String<20> Loc;
+    unsigned short Time1,Time2;
+    double Price[5];
+};
 struct TrainValue
 {
-	String<20> Name;
+	String<40> Name;
 	char Catalog;
-	String<20> Loc[60];
-	String<10> TicketKind[5];
-	short KindNum,LocNum,Time1[60],Time2[60];
-	double Price[300];
-	long LeftPos;
-	void WriteTrain(std::ostream &os)
+	String<20> TicketKind[5];
+	short KindNum,LocNum;
+	long Leftpos[31],StPos;
+		TrainValue()=default;
+	TrainValue(const TrainValue &o)
+	{
+		Catalog=o.Catalog;
+		Name=o.Name;
+		KindNum=o.KindNum;
+		LocNum=o.LocNum;
+		StPos=o.StPos;
+        for (size_t i=0;i<5;++i) TicketKind[i]=o.TicketKind[i];
+        memcpy(Leftpos,o.Leftpos,248);
+    }
+	TrainValue &operator=(const TrainValue &o)
+	{
+		if (&o==this) return *this;
+		Catalog=o.Catalog;
+		Name=o.Name;
+		KindNum=o.KindNum;
+		LocNum=o.LocNum;
+        StPos=o.StPos;
+        for (size_t i=0;i<5;++i) TicketKind[i]=o.TicketKind[i];
+        memcpy(Leftpos,o.Leftpos,248);
+        return *this;
+	}
+	void WriteTrain(std::ostream &os,FileManager<station,1024> &f)
 	{
 		os<<Name<<Catalog<<' '<<LocNum<<' '<<KindNum<<' ';
 		for (int i=0;i<KindNum;i++) os<<TicketKind[i];
 		os<<'\n';
-		os<<Loc[0]<<"xx:xx "<<StrTime(Time1[0])<<"xx:xx ";
-		for (int j=0;j<KindNum;j++) os<<"X"<<Price[j]<<' ';
+		station *a=new station[LocNum];
+		f.AllRead(a,StPos,LocNum);
+		os<<a[0].Loc<<"xx:xx "<<StrTime(a[0].Time1)<<"xx:xx ";
+		for (int j=0;j<KindNum;j++) os<<"￥"<<a[0].Price[j]<<' ';
 		os<<'\n';
 		for (int i=1;i<LocNum-1;i++)
 		{
-			os<<Loc[i]<<StrTime(Time1[i])<<StrTime(Time2[i])<<StrTime(Time2[i]-Time1[i]);
-			for (int j=0;j<KindNum;j++) os<<"X"<<Price[i*5+j]<<' ';
+			os<<a[i].Loc<<StrTime(a[i].Time1)<<StrTime(a[i].Time2)<<StrTime(a[i].Time2-a[i].Time1);
+			for (int j=0;j<KindNum;j++) os<<"￥"<<a[i].Price[j]-a[i-1].Price[j]<<' ';
 			os<<'\n';
 		}
-		os<<Loc[LocNum-1]<<StrTime(Time1[LocNum-1])<<"xx:xx xx:xx ";
-		for (int j=0;j<KindNum;j++) os<<"X"<<Price[(LocNum-1)*5+j]<<' ';
+		os<<a[LocNum-1].Loc<<StrTime(a[LocNum-1].Time1)<<"xx:xx xx:xx ";
+		for (int j=0;j<KindNum;j++) os<<"￥"<<a[LocNum-1].Price[j]-a[LocNum-2].Price[j]<<' ';
 		os<<'\n';
+		delete[] a;
 	}
-	void ReadTrain(std::istream &is)
+	void ReadTrain(std::istream &is,FileManager<station,1024> &f,station* &a)
 	{
 		String<10> s1,s2,sp;
-		LeftPos=-1;
+		Leftpos[0]=-1;
 		is>>Name>>Catalog>>LocNum>>KindNum;
+		a=new station[LocNum];
 		for (int i=0;i<KindNum;i++) is>>TicketKind[i];
-		is>>Loc[0]>>sp>>s1>>sp;Time2[0]=Time1[0]=s1.ToTime();
-		for (int j=0;j<KindNum;j++) is>>sp,Price[j]=sp.ToPrice();
+		is>>a[0].Loc>>sp>>s1>>sp;a[0].Time2=a[0].Time1=s1.ToTime();
+		for (int j=0;j<KindNum;j++) is>>sp,a[0].Price[j]=sp.ToPrice();
 		for (int i=1;i<LocNum-1;i++)
 		{
-			is>>Loc[i]>>s1>>s2>>sp;
-			Time1[i]=s1.ToTime();Time2[i]=s2.ToTime();
-			for (int j=0;j<KindNum;j++) is>>sp,Price[i*5+j]=sp.ToPrice();
+			is>>a[i].Loc>>s1>>s2>>sp;
+            a[i].Time1=s1.ToTime();a[i].Time2=s2.ToTime();
+            while (a[i].Time1<a[i-1].Time2) a[i].Time1+=1440;
+            while (a[i].Time2<a[i].Time1) a[i].Time2+=1440;
+			for (int j=0;j<KindNum;j++)
+			{
+			    is>>sp;
+			    a[i].Price[j]=a[i-1].Price[j]+sp.ToPrice();
+			}
+
 		}
-		is>>Loc[LocNum-1]>>s2>>sp>>sp;Time2[LocNum-1]=Time1[LocNum-1]=s2.ToTime();
-		for (int j=0;j<KindNum;j++) is>>sp,Price[LocNum*5+j-5]=sp.ToPrice();
+		is>>a[LocNum-1].Loc>>s2>>sp>>sp;
+		a[LocNum-1].Time1=s2.ToTime();
+        while (a[LocNum-1].Time1<a[LocNum-2].Time2) a[LocNum-1].Time1+=1440;
+        a[LocNum-1].Time2=a[LocNum-1].Time1;
+		for (int j=0;j<KindNum;j++)
+		{
+		    is>>sp;
+		    a[LocNum-1].Price[j]=a[LocNum-2].Price[j]+sp.ToPrice();
+		}
+
 	}
 
 };//trainkey:string<20>=TrainId
@@ -89,7 +137,7 @@ bool operator<(const UTicketKey &t,const UTicketKey &o)
 	if (t.Catalog<o.Catalog) return true;
 	if (t.Catalog>o.Catalog) return false;
 	//
-	return (t.l1*137+t.l2*13+t.Kind<o.l1*137+o.l2*13+o.Kind);
+	return (t.l1*240+t.l2*4+t.Kind<o.l1*240+o.l2*4+o.Kind);
 }
 bool Cmp_UT(const UTicketKey &x,const UTicketKey &y)
 {
@@ -98,7 +146,6 @@ bool Cmp_UT(const UTicketKey &x,const UTicketKey &y)
 	if (x.Date<y.Date) return true;
 	if (x.Date>y.Date) return false;
 	return false;
-	//todo: ==?
 }
 bool Cmp_SK(const StationKey &x,const StationKey &y)
 {
@@ -107,8 +154,14 @@ bool Cmp_SK(const StationKey &x,const StationKey &y)
 struct Iticket
 {
 	String<20> TrainId,Loc1,Loc2;
-	String<10> Kind;
+	String<20> Kind;
 	short Date,Num;
 	size_t UserId;
+};
+struct Trans
+{
+	String<20> TrainId1,TrainId2;
+	short l11,l12,l21,l22,Date;
+
 };
 #endif //AKINA_BASICSTRUCT_HPP
