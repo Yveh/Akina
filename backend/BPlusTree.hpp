@@ -4,6 +4,9 @@
 #include "ExMemory.hpp"
 #include "BasicStruct.hpp"
 #include "vector.hpp"
+#include "map.hpp"
+#include "priority_queue.hpp"
+#include "utility.hpp"
 #include <fstream>
 #include <functional>
 #include <assert.h>
@@ -12,11 +15,23 @@ enum NodeType{INTERNAL,LEAF};
 template <class Key,class Data,size_t Nodesize,class Cmp=std::less<Key>>
 class BPlusTree
 {
-	static const int MaxDepth = 5000;
+	static const int MaxDepth = 12000;
+//	static const int numeration = 257;
+//	static const int sizelimit = 20011;
+//	static const int hash_buffer_size = sizeof(Key);
 private:
 	std::fstream File;
 	std::string FileName;
 	ExMemory MemoryManager;
+
+//	int hash_function(Key &key)
+//	{
+//		char * buffer = reinterpret_cast<char *>(&key);
+//		int ans = 0;
+//		for (int i = 0; i < hash_buffer_size; ++i)
+//			ans = ans * numeration + buffer[i], ans %= sizelimit;
+//		return ans;
+//	}
 
 	struct bptree_info
 	{
@@ -28,6 +43,7 @@ private:
 	off_t fatherlist[MaxDepth];
 	int facur;
 	class Block;
+    class BufferPool;
 	class Node
 	{
 		NodeType nodeType;
@@ -39,9 +55,125 @@ private:
 		off_t nex;
 		friend BPlusTree;
 		friend Block;
+		friend BufferPool;
 	public:
 		Node(NodeType nodeType = LEAF,Key key0 = Key(),size_t elementNumber = 0,off_t pos = nulloff_t,off_t father = nulloff_t,off_t pre = nulloff_t,off_t nex = nulloff_t) : nodeType(nodeType),key0(key0),pos(pos),elementNumber(elementNumber),father(father),pre(pre),nex(nex){}
 	};
+    class BufferPool
+    {
+        static const int BufferPoolSizeLimit = 5000;
+        struct BPtreeNode
+        {
+            Node nd;
+            char Buffer[Nodesize];
+        };
+        long long timemark = 0;
+        sjtu::map<off_t,BPtreeNode> pool;
+        sjtu::priority_queue<sjtu::pair<long long,off_t> > pq;
+        BPlusTree * bpt;
+        Node read_node(off_t root) {
+            Node p;
+            bpt->File.seekg(root,std::ios::beg);
+            bpt->File.read(reinterpret_cast<char *>(&p),sizeof(p));
+            return p;
+        }
+        void write_node(Node &p)
+        {
+            bpt->File.close();
+            bpt->File.open(bpt->FileName,std::ios::in|std::ios::out|std::ios::binary);
+            bpt->File.seekp(p.pos);
+            bpt->File.write(reinterpret_cast<char *>(&p),sizeof(Node));
+            bpt->File.flush();
+        }
+        void fill_buffer_with_node(char * buffer,const Node &p)
+        {
+            bpt->File.close();
+            bpt->File.open(bpt->FileName,std::ios::in|std::ios::out|std::ios::binary);
+            bpt->File.seekg(p.pos + sizeof(Node));
+            bpt->File.read(buffer,p.elementNumber * (sizeof(Key) + sizeof(off_t)));
+            bpt->File.flush();
+        }
+        void write_buffer_into_node(char *buffer,const Node &p)
+        {
+            bpt->File.close();
+            bpt->File.open(bpt->FileName,std::ios::in|std::ios::out|std::ios::binary);
+            bpt->File.seekp(p.pos + sizeof(Node));
+            bpt->File.write(buffer,p.elementNumber * (sizeof(Key) + sizeof(off_t)));
+            bpt->File.flush();
+        }
+        void OutPool()
+        {
+            sjtu::pair<long long ,off_t > tmp = pq.top();
+            pq.pop();
+            auto it = pool.find(tmp.second);
+            write_node(it->second.nd);
+            write_buffer_into_node(it->second.Buffer,it->second.nd);
+            pool.erase(it);
+        }
+        void pushInPool(off_t pos)
+        {
+            if (pool.size() == BufferPoolSizeLimit)
+                OutPool();
+            BPtreeNode tmp;
+            tmp.nd = read_node(pos);
+            fill_buffer_with_node(tmp.Buffer,tmp.nd);
+//#ifdef DEBUG
+//				for (int i = 0; i < tmp.nd.elementNumber; ++i)
+//					std::cout << "!!key(,),pos : (" << (*(bpt->key_n_in_node(i,tmp.Buffer))).first << "," << (*(bpt->key_n_in_node(i,tmp.Buffer))).second << ") " << (*(bpt->pos_n_in_node(i,tmp.Buffer))) << "\n";
+//#endif
+//#ifdef DEBUG
+//			std::cout << "nodetoberead : "<< tmp.nd.key0.first << " " << tmp.nd.key0.second << " " << tmp.nd.elementNumber << " " << tmp.nd.pos << "\n";
+//#endif
+            pool.insert(sjtu::pair<off_t ,BPtreeNode>(pos,tmp));
+            pq.push(sjtu::pair<long long,off_t >(timemark++,pos));
+        }
+    public:
+        BufferPool(BPlusTree * bpt = nullptr): bpt(bpt){}
+        ~BufferPool() {}
+        Node ReadNode(off_t &pos){
+            auto it = pool.find(pos);
+            if (it == pool.end())
+			{
+                pushInPool(pos),it = pool.find(pos);
+			}
+//#ifdef DEBUG
+//			std::cout << "nodeinfo : "<< it->second.nd.key0.first << " " << it->second.nd.key0.second << " " << it->second.nd.elementNumber << " " << it->second.nd.pos << "\n";
+//            #endif
+            return it->second.nd;
+        }
+        void ReadBuffer(char * buffer,const off_t &pos)
+        {
+            auto it = pool.find(pos);
+            if (it == pool.end())
+                pushInPool(pos),it = pool.find(pos);
+            memcpy(buffer,it->second.Buffer,Nodesize);
+        }
+        void WriteNode(Node &p){
+            auto it = pool.find(p.pos);
+            if (it == pool.end())
+				pushInPool(p.pos),it = pool.find(p.pos);
+			it->second.nd = p;
+        }
+        void WriteNewNode(Node &p,char * buffer)
+		{
+			write_node(p);
+			write_buffer_into_node(buffer,p);
+        	pushInPool(p.pos);
+		}
+        void WriteBuffer(char * buffer,const off_t &pos)
+        {
+            auto it = pool.find(pos);
+            if (it != pool.end())
+            	memcpy(it->second.Buffer,buffer,Nodesize);
+        }
+        void clear()
+        {
+            while(pq.size() != 0)
+                OutPool();
+            timemark = 0;
+        }
+    };
+    BufferPool bfp;
 #ifndef DEBUG
 	const size_t N = (Nodesize - sizeof(Node)) / (sizeof(off_t) + sizeof(Key)) - 1;
 	const size_t M = (Nodesize - sizeof(Block)) / (sizeof(Data) + sizeof(Key)) - 1;
@@ -116,10 +248,11 @@ private:
 		File.flush();
 	}
 	Node read_node(off_t root) {
-		Node p;
-		File.seekg(root,std::ios::beg);
-		File.read(reinterpret_cast<char *>(&p),sizeof(p));
-		return p;
+	    return bfp.ReadNode(root);
+//		Node p;
+//		File.seekg(root,std::ios::beg);
+//		File.read(reinterpret_cast<char *>(&p),sizeof(p));
+//		return p;
 	}
 
 	Block read_block(off_t root)
@@ -129,13 +262,22 @@ private:
 		File.read(reinterpret_cast<char *>(&b),sizeof(Block));
 		return b;
 	}
-	void write_node(Node &p)
+	void write_node(Node &p,int op = 0,char * buf = nullptr)
 	{
-		File.close();
-		File.open(FileName,std::ios::in|std::ios::out|std::ios::binary);
-		File.seekp(p.pos);
-		File.write(reinterpret_cast<char *>(&p),sizeof(Node));
-		File.flush();
+//#ifdef DEBUG
+//	if (op == 1)
+//		for (int i = 0; i < p.elementNumber; ++i)
+//			std::cout << "key(,),pos : (" << (*key_n_in_node(i,buf)).first << "," << (*key_n_in_node(i,buf)).second << ") " << (*pos_n_in_node(i,buf)) << "\n";
+//		#endif
+		if (!op)
+	    	bfp.WriteNode(p);
+		else
+			bfp.WriteNewNode(p,buf);
+//		File.close();
+//		File.open(FileName,std::ios::in|std::ios::out|std::ios::binary);
+//		File.seekp(p.pos);
+//		File.write(reinterpret_cast<char *>(&p),sizeof(Node));
+//		File.flush();
 	}
 	void write_block(Block &b)
 	{
@@ -148,11 +290,12 @@ private:
 
 	void fill_buffer_with_node(char * buffer,const Node &p)
 	{
-        File.close();
-        File.open(FileName,std::ios::in|std::ios::out|std::ios::binary);
-		File.seekg(p.pos + sizeof(Node));
-		File.read(buffer,p.elementNumber * (sizeof(Key) + sizeof(off_t)));
-		File.flush();
+	    bfp.ReadBuffer(buffer,p.pos);
+//        File.close();
+//        File.open(FileName,std::ios::in|std::ios::out|std::ios::binary);
+//		File.seekg(p.pos + sizeof(Node));
+//		File.read(buffer,p.elementNumber * (sizeof(Key) + sizeof(off_t)));
+//		File.flush();
 	}
 	void fill_buffer_with_block(char *buffer,const Block &b)
 	{
@@ -161,11 +304,12 @@ private:
 	}
 	void write_buffer_into_node(char *buffer,const Node &p)
 	{
-	    File.close();
-	    File.open(FileName,std::ios::in|std::ios::out|std::ios::binary);
-		File.seekp(p.pos + sizeof(Node));
-		File.write(buffer,p.elementNumber * (sizeof(Key) + sizeof(off_t)));
-		File.flush();
+	    bfp.WriteBuffer(buffer,p.pos);
+//	    File.close();
+//	    File.open(FileName,std::ios::in|std::ios::out|std::ios::binary);
+//		File.seekp(p.pos + sizeof(Node));
+//		File.write(buffer,p.elementNumber * (sizeof(Key) + sizeof(off_t)));
+//		File.flush();
 	}
 	void write_buffer_into_block(char *buffer,const Block &b)
 	{
@@ -343,10 +487,14 @@ private:
 			}
 			write_block(b2);
 			write_buffer_into_block(buffer2,b2);
+
 //#ifdef DEBUG
 //            std::cout << "facur: " << facur << "\n";
 //            std::cout << "fa: " << fatherlist[facur - 1] << "\n";
-//			#endif
+//			#endif]
+//#ifdef DEBUG
+//			std::cout << "b2.pos: " << b2.pos << "\n";
+//#endif
 			Node p = read_node(fatherlist[--facur]);
 			node_insert(p,b2.key0,b2.pos);
 		}
@@ -366,7 +514,7 @@ private:
 //#ifdef DEBUG
 //        std::cout << "Node before insert : ";
 //        for (int i = 0; i < p.elementNumber ; ++i)
-//            std::cout << i << " (" << (*key_n_in_block(i,buffer)).first << "," << (*key_n_in_block(i,buffer)).second << ") " << *pos_n_in_node(i,buffer) << "\n";
+//            std::cout << i << " (" << (*key_n_in_node(i,buffer)).first << "," << (*key_n_in_node(i,buffer)).second << ") " << *pos_n_in_node(i,buffer) << "\n";
 //#endif
 		int n = search_rank_in_node_lowerbound(key,p,buffer);
 //		if (n >= 0 && n < p.elementNumber && *key_n_in_node(n) == key)
@@ -378,6 +526,7 @@ private:
 		}
 		*pos_n_in_node(n + 1,buffer) = pos;
 		*key_n_in_node(n + 1,buffer) = key;
+
         if (n == -1)
         {
             Key prekey = p.key0;
@@ -387,7 +536,8 @@ private:
             //off_t fa_off = p.father;
             int n1 = n;
             //while (n1 == -1 && fa_off != nulloff_t)
-            while (n1 == -1 && fa_off_dep >= 0)
+            //while (n1 == -1 && fa_off_dep >= 0)
+            while (n1 == -1 && fa_off_dep > 0)
             {
 //                Node fa = read_node(fa_off);
                 Node fa = read_node(fatherlist[fa_off_dep]);
@@ -410,7 +560,7 @@ private:
 //#ifdef DEBUG
 //        std::cout << "Node after insert : ";
 //        for (int i = 0; i <= p.elementNumber ; ++i)
-//            std::cout << i << " (" << (*key_n_in_block(i,buffer)).first << "," << (*key_n_in_block(i,buffer)).second << ") " << *pos_n_in_node(i,buffer) << "\n";
+//            std::cout << i << " (" << (*key_n_in_node(i,buffer)).first << "," << (*key_n_in_node(i,buffer)).second << ") " << *pos_n_in_node(i,buffer) << "\n";
 //        #endif
 		if (++p.elementNumber > N)
 		{
@@ -429,6 +579,7 @@ private:
 			p2.elementNumber = N - (N >> 1);
 			p.elementNumber = (N >> 1) + 1;
 			char buffer2[Nodesize];
+			write_node(p2,1,buffer2);
 			fill_buffer_with_node(buffer2,p2);
 			for (int i = (N >> 1) + 1; i <= N; ++i)
 			{
@@ -436,7 +587,6 @@ private:
 				*key_n_in_node(i - (N >> 1) - 1,buffer2) = *key_n_in_node(i,buffer);
 			}
 			write_buffer_into_node(buffer2,p2);
-			write_node(p2);
 			//if (p.father != nulloff_t)
 			if(fatherlist[facur - 1] != nulloff_t)
 			{
@@ -451,23 +601,23 @@ private:
 				newroot.elementNumber = 2;
 				newroot.key0 = p.key0;
 				char buffer3[Nodesize];
+				write_node(newroot,1,buffer3);
 				fill_buffer_with_node(buffer3,newroot);
 				*pos_n_in_node(0,buffer3) = p.pos;
 				*pos_n_in_node(1,buffer3) = p2.pos;
 				*key_n_in_node(0,buffer3) = p.key0;
 				*key_n_in_node(1,buffer3) = p2.key0;
 				write_buffer_into_node(buffer3,newroot);
-				write_node(newroot);
 				write_bptree_info();
 			}
 		}
 //#ifdef DEBUG
 //        std::cout << "Node after insert adjust: ";
 //        for (int i = 0; i < p.elementNumber ; ++i)
-//            std::cout << i << " (" << (*key_n_in_block(i,buffer)).first << "," << (*key_n_in_block(i,buffer)).second << ") " << *pos_n_in_node(i,buffer) << "\n";
+//            std::cout << i << " (" << (*key_n_in_node(i,buffer)).first << "," << (*key_n_in_node(i,buffer)).second << ") " << *pos_n_in_node(i,buffer) << "\n";
 //            #endif
-		write_buffer_into_node(buffer,p);
 		write_node(p);
+		write_buffer_into_node(buffer,p);
 	}
 	void block_rent_head(Block &outs,Block &ins,char * outsb,char * insb)
 	{
@@ -1016,57 +1166,13 @@ private:
             Node son = read_node(*pos_n_in_node(n,buffer));
             return askarr_subtree(key,CMP,vect1,vect2,son);
         }
-//        off_t bg,ed;
-//        size_t bgn,edn;
-//        search_arr_in_subtree(bg,ed,bgn,edn,key,CMP,p);
-//        if (bg == ed && bgn == edn)
-//            return 0;
-//        Block b = read_block(bgn);
-//        char buffer2[Nodesize];
-//        fill_buffer_with_block(buffer2,b);
-//        if (bg == ed)
-//        {
-//            for (size_t i = 0; i + bgn != edn; ++i)
-//            {
-//                vect1.push_back(*key_n_in_block(i + bgn,buffer2));
-//                vect2.push_back(*data_n_in_block(i + bgn,buffer2));
-//            }
-//            return 1;
-//        }
-//        for (size_t i = 0; i + bgn != b.elementNumber; ++i)
-//        {
-//            vect1.push_back(*key_n_in_block(i + bgn,buffer2));
-//            vect2.push_back(*data_n_in_block(i + bgn,buffer2));
-//        }
-//        while (b.nex != ed)
-//        {
-//            b = read_block(b.nex);
-//            char buffer2[Nodesize];
-//            fill_buffer_with_block(buffer2,b);
-//            for (size_t i = 0; i < b.elementNumber; ++i)
-//            {
-//                vect1.push_back(*key_n_in_block(i + bgn,buffer2));
-//                vect2.push_back(*data_n_in_block(i + bgn,buffer2));
-//            }
-//        }
-//        if (ed != nulloff_t)
-//        {
-//            b = read_block(ed);
-//            char buffer2[Nodesize];
-//            fill_buffer_with_block(buffer2,b);
-//            for (size_t i = 0; i < edn; ++i)
-//            {
-//                vect1.push_back(*key_n_in_block(i + bgn,buffer2));
-//                vect2.push_back(*data_n_in_block(i + bgn,buffer2));
-//            }
-//        }
-//        return 1;
     }
 public:
 	BPlusTree(const std::string &FName,const std::string &MMFName){
 		MemoryManager.SetName(MMFName);
 		FileName = FName;
 		File.open(FName,std::ios::in|std::ios::binary);
+        bfp = this;
 		if (!File.is_open())
 		{
 			File.close();
@@ -1081,9 +1187,11 @@ public:
 			File.close();
 			File.open(FName,std::ios::in|std::ios::out|std::ios::binary);
 		}
+
 	}
 	~BPlusTree(){
 		MemoryManager.write_info();
+		bfp.clear();
 		write_bptree_info();
 		File.close();
 	}
@@ -1110,8 +1218,12 @@ public:
 		{
 			Node p = Node(LEAF,key,0,MemoryManager.malloc(Nodesize));
 			Block b = Block(0,key,MemoryManager.malloc(Nodesize));
-			b.father = BPI.Root = p.pos;
+			facur = 2;
+			fatherlist[0] = nulloff_t;
+			fatherlist[1] = BPI.Root = p.pos;
+//			b.father = BPI.Root = p.pos;
 			block_insert(b,key,data);
+			--facur;
 			node_insert(p,key,b.pos);
 			BPI.Head = BPI.Tail = b.pos;
 			write_bptree_info();
@@ -1153,6 +1265,7 @@ public:
 		File.open(FileName,std::ios::binary|std::ios::in|std::ios::out|std::ios::trunc);
 		MemoryManager.clear();
 		MemoryManager.write_info();
+		bfp.clear();
 		BPI.Root = BPI.Head = BPI.Tail = nulloff_t;
 		BPI.ElementNumber = 0;
 		write_bptree_info();
