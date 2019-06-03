@@ -58,8 +58,8 @@ def post_and_get(msg):
 
 
 if __name__ == "__main__": # For testing
-    print(post_and_get("exit"))
-    print(post_and_get("clean"))
+    print(post_and_get(input()))
+
 
 
     

@@ -63,8 +63,8 @@ namespace server {
 		static stringstream is, os;
 		static UserManager user_manager;
 		static TrainManager train_manager;
-		
-		cerr << buf << endl;
+	
+		cerr << "shell " << buf << endl;
 		is.clear();
 		os.clear();
 		is.str(buf);
@@ -73,7 +73,8 @@ namespace server {
 		bool no_exit = 1;
 		
 		Main_Command(*((istream*)(&is)), *((ostream*)(&os)), user_manager, train_manager, no_exit);
-		strcpy(buffer, os.str().c_str());
+		strcpy(buf, os.str().c_str());
+		buf[os.str().size()] = '\0';
 
 		if (!no_exit) {
 			return -1;
@@ -125,6 +126,8 @@ namespace server {
 		server_addr.sin_port = htons(server_port);
 		server_addr.sin_addr.s_addr = inet_addr(server_ip.c_str());
 		server_id = socket(PF_INET, SOCK_STREAM, 0);
+		int reuse = 1;
+		setsockopt(server_id, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
 		if (bind(server_id, (struct sockaddr* ) &server_addr, sizeof(server_addr)) < 0) {
 			stderr_Failed("server address unavailable");
 			return false;
@@ -136,16 +139,16 @@ namespace server {
 	}
 	
 	void server_end() {
-		cerr << "closing server...";
 		if (is_started) {
+			cerr << "closing server...";
 			is_started = 0;
+			//shutdown(server_id, SHUT_RDWR);
 			close(server_id);
 		}
 		stderr_OK();
 	}
 
 	void listening() {
-		server_start();
 		while (true) {
 			cerr << "started listening " << server_ip << ":" << server_port << endl;
 			client_id = accept(server_id, (struct sockaddr*)&client_addr, &sock_length);
@@ -163,7 +166,7 @@ namespace server {
 				}
 				buffer[len] = '\0';
 				stderr_OK("successfully received " + std::to_string(len) + " bytes");	
-				cerr << buffer << endl;
+		//		cerr << buffer << endl;
 			}
 			catch (...) {
 				stderr_Failed("connection is broken");
@@ -184,17 +187,19 @@ namespace server {
 					stderr_OK("operation ok");
 				}
 			}
-
 		}
-		server_end();
 	}
 
 
 	void init() {
 		load_config();
+		while (!server_start()) {
+			sleep(1);
+		}
 	}
 
 	void fin() {
+		server_end();
 	}
 
 }
