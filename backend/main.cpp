@@ -64,6 +64,9 @@ namespace server {
 		static UserManager user_manager;
 		static TrainManager train_manager;
 		
+		cerr << buf << endl;
+		is.clear();
+		os.clear();
 		is.str(buf);
 		os.str("");
 

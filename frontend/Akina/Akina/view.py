@@ -256,8 +256,22 @@ def manageRender(request):
         
         #TO DO: sale/delete/modify
         print('command:' + 'query_train' + ' ' + uid + '\n')
-        ret = uclient.post_and_get('query_train' + ' ' + uid + '\n')
+        ret = uclient.post_and_get('query_train' + ' ' + uid + '\n').split('\n')
         print(ret)
+        table = []
+        for i in ret:
+            utrain = i.split()
+            print(utrain)
+            tmp = {}
+            if (len(utrain) > 6):
+                c['trainID'] = utrain[0]
+                c['name'] = utrain[1]
+                c['catalog'] = utrain[2]
+                for i in range(5, len(utrain) - 1):
+                    c['catalog'] += utrain[i] + ' '
+                continue
+            table.append(tmp)
+        c['table'] = json.dumps(table)
         return render(request, 'manage.html', c)
     return render(request, 'manage.html', c)
 
@@ -320,7 +334,7 @@ def personRender(request):
         c['uname'] = request.session.get('uname')
         c['uphone'] = request.session.get('uphone')
         c['uemail'] = request.session.get('uemail')
-        render(request, 'person.html', c)
+        return render(request, 'person.html', c)
 
     return render(request, 'person.html', c)
 
@@ -347,4 +361,41 @@ def addtrainRender(request):
     c['uphone'] = request.session.get('uphone')
     c['uemail'] = request.session.get('uemail')
     c['uprivilege'] = request.session.get('uprivilege')
+
+    if (request.method == "POST"):
+        print(request.POST)
+        utrainid = request.POST.get('trainId')
+        uname = request.POST.get('name')
+        ucatalog = request.POST.getlist('catalog')
+        uucatalog = ''
+        for i in ucatalog:
+            uucatalog = uucatalog + i
+        utype = request.POST.getlist('type[]')
+        uloc1 = request.POST.getlist('loc1[]')
+        utime1 = request.POST.getlist('time1[]')
+        utime2 = request.POST.getlist('time2[]')
+        utime3 = request.POST.getlist('time3[]')
+        uprice = request.POST.getlist('price[]')
+
+        # TO DO checker
+        command = 'add_train' + ' ' + utrainid + ' ' + uname + ' ' + uucatalog + ' ' + str(len(uloc1)) + ' ' + str(len(utype))
+        for i in utype:
+            command += ' ' + i
+        command += '\n'
+        for i in range(0, len(uloc1)):
+            command += uloc1[i] + ' '
+            if (i == 0):
+                command += 'xx:xx '
+            else:
+                command += utime1[i] + ' '
+            if (i == len(uloc1) - 1):
+                command += 'xx:xx '
+            else:
+                command += utime2[i] + ' '
+            command += utime3[i] + ' ¥' + uprice[i] + '\n'
+        print('command:' + command)
+        ret = uclient.post_and_get(command)
+        print(ret)
+        return redirect('/manage/')
+
     return render(request, 'addtrain.html', c)

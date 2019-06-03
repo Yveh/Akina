@@ -11,6 +11,7 @@ void Main_Command(std::istream &is,std::ostream &os,UserManager &MainUser,TrainM
 {
     String<20> Cmd;
 	is>>Cmd;
+	std::cerr << Cmd << std::endl;
 	if (Cmd=="exit")
 	{
 		Exit=false;

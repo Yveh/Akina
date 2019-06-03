@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block head %}
 <link href="/static/css/addtrain.css" rel="stylesheet">
+<script src="/static/js/addtrain.js"></script>
 <style type="text/css">
     {% if message %}
         {% for i in message %}
@@ -16,6 +17,7 @@
     <div class="container" style="margin-top: 6rem">
         <div class="box-transparent py-4 px-4">
             <form action="" method="POST">
+                {{ csrf_input }}
                 <div class="row">
                     <div class="col-4">
                         <div class="form-group">
@@ -60,6 +62,7 @@
                                 </tr>
                             </tbody>
                         </table>
+                        <button type="button" id="ticketButton" class="btn btn-md btn-primary my-2">添加行</button>
                     </div>
                 </div>
                 <div class="row">
@@ -68,25 +71,30 @@
                             data-side-pagination="client" data-mobile-responsive="true">
                             <thead>
                                 <tr>
-                                    <th data-field="type" data-align="center">出发站</th>
-                                    <th data-field="type" data-align="center">到达时间</th>
-                                    <th data-field="type" data-align="center">出发时间</th>
-                                    <th data-field="type" data-align="center">经停时间</th>
-                                    <th data-field="type" data-align="center">票价</th>
-                                    <th data-field="type" data-align="center">目的站</th>
+                                    <th data-field="loc1" data-align="center">出发站</th>
+                                    <th data-field="time1" data-align="center">到达时间</th>
+                                    <th data-field="time2" data-align="center">出发时间</th>
+                                    <th data-field="time3" data-align="center">经停时间</th>
+                                    <th data-field="price" data-align="center">票价</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
                                     <td><input type="text" class="form-control" name="loc1[]"></td>
                                     <td><input type="time" name="time1[]"></td>
-                                    <td><input type="text" name="time2[]"></td>
+                                    <td><input type="time" name="time2[]"></td>
                                     <td><input type="time" name="time3[]"></td>
-                                    <td><input type="text" class="form-control" name="loc2[]"></td>
+                                    <td><input type="text" class="form-control" name="price[]"></td>
                                 </tr>
                             </tbody>
                         </table>
+                        <button type="button" id="trainButton" class="btn btn-md btn-primary my-2">添加行</button>
                     </div>
+                </div>
+                <div class="row">
+                    <dic class="col">
+                        <button type="submit" class="btn btn-md btn-primary btn-block">提交</button>
+                    </dic>
                 </div>
             </form>
         </div>
