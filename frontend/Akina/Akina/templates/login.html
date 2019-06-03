@@ -38,16 +38,16 @@
                             <div class="col">
                                 <ul class="nav nav-tabs nav-fill justify-content-center mb-3">
                                     <li class="nav-item">
-                                        <a class="nav-link active" data-toggle="tab" href="#login-form">登录</a>
+                                        <a class="nav-link {% if not flag %} active {% endif %}" data-toggle="tab" href="#login-form">登录</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link" data-toggle="tab" href="#register-form">注册</a>
+                                        <a class="nav-link {% if flag %} active {% endif %}" data-toggle="tab" href="#register-form">注册</a>
                                     </li>
                                 </ul>
                             </div>
                         </div>
                         <div class="tab-content">
-                            <div class="tab-pane active" id="login-form">
+                            <div class="tab-pane {% if not flag %} active {% endif %}" id="login-form">
                                 <form action="" method="POST">
                                     {{ csrf_input }}
                                     <div class="row">
@@ -76,7 +76,7 @@
                                     </div>
                                 </form>
                             </div>
-                            <div class="tab-pane" id="register-form">
+                            <div class="tab-pane {% if flag %} active {% endif %}" id="register-form">
                                 <form action="" method="POST">
                                     {{ csrf_input }}
                                     <div class="row">

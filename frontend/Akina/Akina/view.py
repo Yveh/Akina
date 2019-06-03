@@ -36,7 +36,8 @@ def loginRender(request):
                 return render(request, 'login.html', c)
             print('command:' + 'register' + ' ' + uname + ' ' + upassword + ' ' + uemail + ' ' + uphone + '\n')
             ret = uclient.post_and_get('register' + ' ' + uname + ' ' + upassword + ' ' + uemail + ' ' + uphone + '\n')
-            if (ret != '1\n'):
+            print(ret)
+            if (ret == '-1\n'):
                 w.append('inputUsernameR')
                 w.append('inputPasswordR')
                 w.append('inputEmailR')
@@ -56,6 +57,7 @@ def loginRender(request):
                 return render(request, 'login.html', c)
             print('command:' + 'login' + ' ' + uid + ' ' + upassword + '\n')
             ret = uclient.post_and_get('login' + ' ' + uid + ' ' + upassword + '\n')
+            print(ret)
             if (ret != '1\n'):
                 w.append('inputId')
                 w.append('inputPassword')
@@ -73,6 +75,8 @@ def loginRender(request):
                 request.session['upassword'] = upassword
                 return redirect('/train/')
     
+    print(request.GET)
+    c['flag'] = request.GET.get('flag')
     return render(request, 'login.html', c)
 
 def logoutRender(request):
@@ -111,7 +115,6 @@ def trainRender(request):
         if (not inputchecker.dateChecker(udate)):
             w.append('date')
         uucatalog = ''
-        print(ucatalog)
         for i in ucatalog:
             uucatalog = uucatalog + i
         if (not inputchecker.catalogChecker(uucatalog)):
@@ -122,10 +125,10 @@ def trainRender(request):
 
         #TO DO: show the results / buy
         c['querydone'] = True
-        print(utransfer)
         if (utransfer == 'on'):
             print('command:' + 'query_transfer' + ' ' + uloc1 + ' ' + uloc2 + ' ' + udate + ' ' + uucatalog + '\n')
             ret = uclient.post_and_get('query_transfer' + ' ' + uloc1 + ' ' + uloc2 + ' ' + udate + ' ' + uucatalog + '\n').split('\n')
+            print(ret)
             table = []
             for i in ret:
                 utrain = i.split()
@@ -149,6 +152,7 @@ def trainRender(request):
         else:
             print('command:' + 'query_ticket' + ' ' + uloc1 + ' ' + uloc2 + ' ' + udate + ' ' + uucatalog + '\n')
             ret = uclient.post_and_get('query_ticket' + ' ' + uloc1 + ' ' + uloc2 + ' ' + udate + ' ' + uucatalog + '\n').split('\n')
+            print(ret)
             table = []
             for i in ret:
                 utrain = i.split()
@@ -320,5 +324,27 @@ def personRender(request):
 
     return render(request, 'person.html', c)
 
+def cleanRender(request):
+    request.session.flush()
+    print('command:' + 'clean' + '\n')
+    ret = uclient.post_and_get('command:' + 'clean' + '\n')
+    print(ret)
+    return redirect('/')
+
 def baseRender(request):
     return render(request, 'base.html')
+
+def addtrainRender(request):
+    if (not request.session.get('uid')):
+        return redirect('/login/')
+    
+    c = {}
+    w = []
+
+    c['uid'] = request.session.get('uid')
+    c['upassword'] = request.session.get('upassword')
+    c['uname'] = request.session.get('uname')
+    c['uphone'] = request.session.get('uphone')
+    c['uemail'] = request.session.get('uemail')
+    c['uprivilege'] = request.session.get('uprivilege')
+    return render(request, 'addtrain.html', c)

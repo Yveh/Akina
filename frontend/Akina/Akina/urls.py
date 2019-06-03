@@ -26,5 +26,7 @@ urlpatterns = [
     path(r'manage/', view.manageRender),
     path(r'person/', view.personRender),
     path(r'logout/', view.logoutRender),
+    path(r'clean/', view.cleanRender),
     path(r'base/', view.baseRender),
+    path(r'addtrain/', view.addtrainRender)
 ]

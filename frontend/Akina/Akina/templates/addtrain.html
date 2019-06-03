@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block head %}
+<link href="/static/css/addtrain.css" rel="stylesheet">
+<style type="text/css">
+    {% if message %}
+        {% for i in message %}
+            #{{ i }}{ 
+                box-shadow: 0 0 0 0.2rem rgb(255, 0, 0);
+            }
+        {% endfor %}
+    {% endif %}
+</style>
+{% endblock %}
+{% block main %}
+<div class="d-flex align-items-center" id="main">
+    <div class="container" style="margin-top: 6rem">
+        <div class="box-transparent py-4 px-4">
+            <form action="" method="POST">
+                <div class="row">
+                    <div class="col-4">
+                        <div class="form-group">
+                            <input type="text" name="trainId" class="form-control"
+                                placeholder="Train Id" id="trainId" required>
+                            <label for="trainId">Train Id</label>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="form-group">
+                            <input type="text" name="name" class="form-control"
+                                placeholder="Train Name" id="name" required>
+                            <label for="name">Train Name</label>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="form-group">
+                            <select name="catalog" class="selectpicker" multiple data-actions-box="true" title="Choose train types" data-width="100%" id="catalog">
+                                <option>C</option>
+                                <option>D</option>
+                                <option>G</option>
+                                <option>K</option>
+                                <option>O</option>
+                                <option>T</option>
+                                <option>Z</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <table id="ticketTable" class="display table table-hover" data-toggle="table" data-striped="true"
+                            data-side-pagination="client" data-mobile-responsive="true">
+                            <thead>
+                                <tr>
+                                    <th data-field="type" data-align="center">票种</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><input type="text" class="form-control" name="type[]"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <table id="trainTable" class="display table table-hover" data-toggle="table" data-striped="true"
+                            data-side-pagination="client" data-mobile-responsive="true">
+                            <thead>
+                                <tr>
+                                    <th data-field="type" data-align="center">出发站</th>
+                                    <th data-field="type" data-align="center">到达时间</th>
+                                    <th data-field="type" data-align="center">出发时间</th>
+                                    <th data-field="type" data-align="center">经停时间</th>
+                                    <th data-field="type" data-align="center">票价</th>
+                                    <th data-field="type" data-align="center">目的站</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><input type="text" class="form-control" name="loc1[]"></td>
+                                    <td><input type="time" name="time1[]"></td>
+                                    <td><input type="text" name="time2[]"></td>
+                                    <td><input type="time" name="time3[]"></td>
+                                    <td><input type="text" class="form-control" name="loc2[]"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

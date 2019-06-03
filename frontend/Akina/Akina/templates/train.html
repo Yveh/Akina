@@ -45,10 +45,12 @@ body {
                 </div>
                 <div class="row d-flex align-items-center">
                     <div class="col-2">
+                        {% if uid %}
                         <div class="custom-control custom-checkbox">
                             <input name="transfer" type="checkbox" class="custom-control-input" id="transfer">
                             <label class="custom-control-label" for="transfer"><b>Transfer</b></label>
                         </div>
+                        {% endif %}
                     </div>
                     <div class="col-5">
                         <div class="form-group">
