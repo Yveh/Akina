@@ -88,7 +88,7 @@ struct TrainValue
 	}
 	void ReadTrain(std::istream &is,FileManager<station,1024> &f,station* &a)
 	{
-		String<10> s1,s2,sp;
+		String<20> s1,s2,sp;
 		Leftpos[0]=-1;
 		is>>Name>>Catalog>>LocNum>>KindNum;
 		a=new station[LocNum];
