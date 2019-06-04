@@ -5,6 +5,7 @@ import json
 
 from . import uclient
 from . import inputchecker
+from . import captcha
 
 def startRender(request):
     return render(request, 'start.html')
@@ -15,14 +16,15 @@ def loginRender(request):
 
     c = {}
     w = []
-
+   
     if (request.method == 'POST'):
         if (request.POST.get('type') == '注册'):
             uname = request.POST.get('username')
             upassword = request.POST.get('password')
             uemail = request.POST.get('email')
             uphone = request.POST.get('phone')
-            
+            ucaptcha = request.POST.get('captcha')
+            captcha_ans = captcha.get_captcha_ans(request.session.get('captcha_id'))
             if (not inputchecker.nameChecker(uname)):
                 w.append('inputUsernameR')
             if (not inputchecker.passwordChecker(upassword)):
@@ -31,18 +33,36 @@ def loginRender(request):
                 w.append('inputEmailR')
             if (not inputchecker.phoneChecker(uphone)):
                 w.append('inputPhoneR')
+            if ((not inputchecker.captchaChecker(ucaptcha)) or (ucaptcha != 'baby' and float(ucaptcha) != captcha_ans)):
+                w.append('inputCaptchaR')
             c['message'] = w
+             
+            cap = captcha.generate_captcha()
+            c['captcha_id'] = cap[0]
+            c['captcha_html'] = cap[1]
+   
             if (w):
+                c['flag'] = True
                 return render(request, 'login.html', c)
             print('command:' + 'register' + ' ' + uname + ' ' + upassword + ' ' + uemail + ' ' + uphone + '\n')
             ret = uclient.post_and_get('register' + ' ' + uname + ' ' + upassword + ' ' + uemail + ' ' + uphone + '\n')
             print(ret)
-            if (ret == '-1\n'):
+            if (type(ret) != str or ret == '-1\n'):
+                '''
                 w.append('inputUsernameR')
                 w.append('inputPasswordR')
                 w.append('inputEmailR')
                 w.append('inputPhoneR')
+                '''
+                c['show_flag'] = True
+                c['show_color'] = '#FF2D2D'
+                c['show_message'] = '服务器在上物理课🐴'
                 c['message'] = w
+                c['flag'] = True
+            else:
+                c['show_flag'] = True
+                c['show_color'] = '#66BB44'
+                c['show_message'] = "Success! ID: " + str(int(ret))
             return render(request, 'login.html', c)
         elif (request.POST.get('type') == '登录'):
             uid = request.POST.get('id')
@@ -54,14 +74,19 @@ def loginRender(request):
                 w.append('inputPassword')
             c['message'] = w
             if (w):
+                c['flag'] = False
                 return render(request, 'login.html', c)
             print('command:' + 'login' + ' ' + uid + ' ' + upassword + '\n')
             ret = uclient.post_and_get('login' + ' ' + uid + ' ' + upassword + '\n')
             print(ret)
             if (ret != '1\n'):
+                c['show_flag'] = True
+                c['show_color'] = '#FF2D2D'
+                c['show_message'] = '🐴？'
                 w.append('inputId')
                 w.append('inputPassword')
                 c['message'] = w
+                c['flag'] = False
                 return render(request, 'login.html', c)
             else:
                 print('command:' + 'query_profile' + ' ' + uid + '\n')
@@ -74,10 +99,13 @@ def loginRender(request):
                 request.session['uprivilege'] = ret[3]
                 request.session['upassword'] = upassword
                 return redirect('/train/')
-    
-    print(request.GET)
-    c['flag'] = request.GET.get('flag')
-    return render(request, 'login.html', c)
+    else:
+        cap = captcha.generate_captcha()
+        request.session['captcha_id'] = cap[0]
+        c['captcha_html'] = cap[1]
+        print(request.GET)
+        c['flag'] = request.GET.get('flag')
+        return render(request, 'login.html', c)
 
 def logoutRender(request):
     request.session.flush()

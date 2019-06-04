@@ -17,6 +17,7 @@ from django.contrib import admin
 from django.urls import path
 
 from . import view
+from . import captcha
 
 urlpatterns = [
     path(r'', view.startRender),
@@ -28,5 +29,5 @@ urlpatterns = [
     path(r'logout/', view.logoutRender),
     path(r'clean/', view.cleanRender),
     path(r'base/', view.baseRender),
-    path(r'addtrain/', view.addtrainRender)
+    path(r'addtrain/', view.addtrainRender),
 ]
