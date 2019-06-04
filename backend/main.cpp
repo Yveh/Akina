@@ -21,6 +21,7 @@ namespace server {
 
 	string server_ip = "127.0.0.1";
 	int server_port = 3012;
+	string token = "Lily";
 
 	int server_id, client_id;
 	struct sockaddr_in server_addr, client_addr;
@@ -59,22 +60,22 @@ namespace server {
 		strcpy(buffer, ret.c_str());
 	}
 
-	int shell(char buf[], int len) {
+	int shell(const string &msg) {
 		static stringstream is, os;
 		static UserManager user_manager;
 		static TrainManager train_manager;
 	
-		cerr << "shell " << buf << endl;
+		cerr << "shell " << msg << endl;
 		is.clear();
 		os.clear();
-		is.str(buf);
+		is.str(msg);
 		os.str("");
 
 		bool no_exit = 1;
 		
 		Main_Command(*((istream*)(&is)), *((ostream*)(&os)), user_manager, train_manager, no_exit);
-		strcpy(buf, os.str().c_str());
-		buf[os.str().size()] = '\0';
+		strcpy(buffer, os.str().c_str());
+		buffer[os.str().size()] = '\0';
 
 		if (!no_exit) {
 			return -1;
@@ -87,7 +88,7 @@ namespace server {
 
 	void load_config() {
 		cerr << "loading config...";
-		FILE* config = fopen("config.ini", "r");
+		FILE* config = fopen("config.json", "r");
 		if (!config) {
 			stderr_Failed("file error, using default config.");
 			return;
@@ -104,8 +105,10 @@ namespace server {
 		try {
 			string ip = root["server_ip"].asString();
 			int port = root["server_port"].asInt();
+			string tok = root["token"].asString();
 			server_ip = ip;
 			server_port = port;
+			token = tok;
 		}
 		catch (...) {
 			stderr_Failed("parameters unrecognized, using default config.");
@@ -171,12 +174,33 @@ namespace server {
 			catch (...) {
 				stderr_Failed("connection is broken");
 				close(client_id);
-				client_id = -1;
+				continue;
 			}
 			if (client_id != -1) {
-				int ret = shell(buffer, len);
-				send(client_id, buffer, strlen(buffer), 0);
-				cerr << "send : " << buffer << endl;
+
+				Json::Value root;
+	
+				if (!reader.parse(buffer, buffer + strlen(buffer), root)) {
+					stderr_Failed("Json parse failed");
+					close(client_id);
+					continue;
+				}
+				int ret = 0;
+				try {
+					string tok = 	root["token"].asString();
+					string msg = 	root["msg"].asString();
+					if (tok != token) {
+						stderr_Failed("wrong token");
+					}
+					else {
+						ret = shell(msg);
+						send(client_id, buffer, strlen(buffer), 0);
+						cerr << "send : " << buffer << endl;
+					}
+				}
+				catch (...) {
+					stderr_Failed("invalid command");
+				}
 				close(client_id);
 
 				if (ret == -1) {
