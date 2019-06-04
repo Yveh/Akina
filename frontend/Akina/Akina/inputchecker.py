@@ -3,6 +3,9 @@ import re
 def stringChecker(x):
     return type(x) == type('lily')
 
+def captchaChecker(x):
+    return stringChecker(x) and len(x) > 0 and len(x) <= 40 and (x == 'baby' or re.match("^[+-]?([0-9]*[.]?[0-9]*)$", x) != None)
+
 def idChecker(x):
     return stringChecker(x) and len(x) > 0 and len(x) <= 10 and re.match(r"^[1-9][0-9]+$", x) != None
 
