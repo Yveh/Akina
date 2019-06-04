@@ -314,13 +314,13 @@ def manageRender(request):
         if (w):
             return render(request, 'manage.html', c)
         
-        c['querydone'] = True
         if (uop == '发售车次'):
             print('command:' + 'sale_train' + ' ' + uid + '\n')
             ret = uclient.post_and_get('sale_train' + ' ' + uid + '\n')
             print(ret)
             return render(request, 'manage.html', c)
         elif (uop == '搜索车次'):
+            c['querydone'] = True
             print('command:' + 'query_train' + ' ' + uid + '\n')
             ret = uclient.post_and_get('query_train' + ' ' + uid + '\n').split('\n')
             print(ret)
