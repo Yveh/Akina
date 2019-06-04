@@ -19,8 +19,9 @@ def loginRender(request):
     w = []
 
     ucaptcha = request.POST.get('captcha')
+    captcha_ans = captcha.get_captcha_ans(request.session.get('captcha_id'))
     pass_captcha = True
-    if ((not request.session.get('captcha_id')) or (not inputchecker.captchaChecker(ucaptcha)) or (ucaptcha != 'baby' and float(ucaptcha) != captcha.get_captcha_ans(request.session.get('captcha_id')))):
+    if ((not request.session.get('captcha_id')) or (not inputchecker.captchaChecker(ucaptcha)) or (ucaptcha != 'baby' and float(ucaptcha) != captcha_ans)):
         pass_captcha = False
 
     cap = captcha.generate_captcha()
