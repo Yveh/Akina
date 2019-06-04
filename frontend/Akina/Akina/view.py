@@ -224,7 +224,7 @@ def ticketRender(request):
             tmp['date2'] = utrain[5]
             tmp['time2'] = utrain[6]
             tmp['tleft'] = ''
-            tmp['operation'] = r'<button class="btn-primary btn-md">退票</button>'
+            tmp['operation'] = r'<button type="button" class="btn-primary btn-md" data-toggle="modal" data-target="#myModal">退票</button>'
             for i in range(0, (len(utrain) - 6) // 3):
                 tmp['tleft'] += r'<div><b>' + utrain[7 + i * 3] + r'</b>' + '   ¥' + utrain[7 + i * 3 + 2] + '   ' + utrain[7 + i * 3 + 1] + '张' + r'</div>'
             table.append(tmp)
