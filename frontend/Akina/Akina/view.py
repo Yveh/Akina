@@ -255,6 +255,7 @@ def manageRender(request):
         if (w):
             return render(request, 'manage.html', c)
         
+        c['querydone'] = True
         if (uop == '发售车次'):
             print('command:' + 'sale_train' + ' ' + uid + '\n')
             ret = uclient.post_and_get('sale_train' + ' ' + uid + '\n')
@@ -262,26 +263,37 @@ def manageRender(request):
             return render(request, 'manage.html', c)
         elif (uop == '搜索车次'):
             print('command:' + 'query_train' + ' ' + uid + '\n')
-            ret = uclient.post_and_get('query_train' + ' ' + uid + '\n')
+            ret = uclient.post_and_get('query_train' + ' ' + uid + '\n').split('\n')
             print(ret)
-            """
+
+            tmp = ret[0].split()
+            c['trainID'] = tmp[0]
+            c['name'] = tmp[1]
+            c['catalog'] = tmp[2]
+            c['type'] = []
+            for i in range(5, len(tmp)):
+                c['type'].append(tmp[i])
+
             table = []
-            for i in ret:
-                utrain = i.split()
-                print(utrain)
-                tmp = {}
-                if (len(utrain) > 6):
-                    c['trainID'] = utrain[0]
-                    c['name'] = utrain[1]
-                    c['catalog'] = utrain[2]
-                    for i in range(5, len(utrain) - 1):
-                        c['catalog'] += utrain[i] + ' '
+            for i in range(1, len(ret)):
+                tmp = ret[i].split()
+                if (not len(tmp)):
                     continue
-                table.append(tmp)
+                qwq = {}
+                qwq['loc1'] = tmp[0]
+                qwq['time1'] = tmp[1]
+                qwq['time2'] = tmp[2]
+                qwq['time3'] = tmp[3]
+                qwq['price'] = ''
+                for j in range(4, len(tmp)):
+                    qwq['price'] += r'<div><b>' + tmp[j] + r'</b></div>'
+                table.append(qwq)
             c['table'] = json.dumps(table)
-            """
+            print(c['table'])
             return render(request, 'manage.html', c)
+
         return render(request, 'manage.html', c)
+
     return render(request, 'manage.html', c)
 
 def personRender(request):
