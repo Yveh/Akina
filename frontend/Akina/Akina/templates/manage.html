@@ -26,15 +26,21 @@
             <form action="" method="POST">
                 {{ csrf_input }}
                 <div class="row d-flex align-items-center">
-                    <div class="col-6">
+                    <div class="col">
                         <div class="form-group">
                             <input type="text" name="id" class="form-control" placeholder="Train id" id="inputId" required>
                             <label for="inputId">Train id</label>
                         </div>
                     </div>
+                </div>
+                <div class="row">
                     <div class="col-6">
-                        <input value="搜索车次" class="btn btn-lg btn-primary btn-block" type="submit">
+                        <input name="op" value="搜索车次" class="btn btn-lg btn-primary btn-block" type="submit">
                     </div>
+                    <div class="col-6">
+                        <input name="op" value="发售车次" class="btn btn-lg btn-primary btn-block" type="submit">
+                    </div>
+                </div>
             </form>
         </div>
     </div>
