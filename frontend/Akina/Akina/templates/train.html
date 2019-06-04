@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% block head %}
 <link href="/static/css/train.css" rel="stylesheet">
-<script src="/static/js/train.js"></script>
 <style type="text/css">
     {% if message %}
         {% for i in message %}
@@ -18,6 +17,35 @@ body {
     height: 100vh;
 }
 </style>
+<script>
+function swapLoc1Loc2() {
+    var loc1 = document.getElementById("loc1").value;
+    var loc2 = document.getElementById("loc2").value;
+
+    document.getElementById("loc1").value = loc2;
+    document.getElementById("loc2").value = loc1;
+}
+</script>
+{% else %}
+<script>
+    var jsonStr_ = "{{ tableO }}";
+    var jsonStr = jsonStr_.replace(/\&#34;/g, '\"');
+    var table = JSON.parse(jsonStr)
+    $(document).ready(function(){
+    $('#myModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var id = button.data('id');
+        var modal = $(this);
+        for (i in table[id].type)
+            $('#modalSelect').append("<option>" + table[id].type[i] + "</option>")
+        $('#modalSelect').selectpicker("refresh");
+        $('#trainID').value = table[id].trainID
+        $('#loc1').value = table[id].loc1
+        $('#loc2').value = table[id].loc2
+        $('#date').value = table[id].date
+      })
+})
+</script>
 {% endif %}
 {% endblock %}
 {% block main %}
@@ -100,6 +128,42 @@ body {
                     </tr>
               </thead>
             </table>
+        </div>
+    </div>
+    <div class="modal fade" id="myModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">选择票种</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="container">
+                        <form action="" method="POST">
+                            {{ csrf_input }}
+                            <div class="row d-flex align-items-center">
+                                <div class="col">
+                                    <div class="form-group">
+                                        <select name="type" class="selectpicker" id="modalSelect" data-width="100%">
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <input name="op" value="购买" class="btn btn-md btn-primary btn-block" type="submit">
+                                </div>
+                            </div>
+                            <input type="text" name="trainID" id="trainID" hidden>
+                            <input type="text" name="loc1" id="loc1" hidden>
+                            <input type="text" name="loc2" id="loc2" hidden>
+                            <input type="text" name="date" id="date" hidden>
+                        </form>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
         </div>
     </div>
     {% endif %}

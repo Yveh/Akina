@@ -123,44 +123,60 @@ def trainRender(request):
     c['uprivilege'] = request.session.get('uprivilege')
 
     if (request.method == 'POST'):
-        uloc1 = request.POST.get('loc1')
-        uloc2 = request.POST.get('loc2')
-        utransfer = request.POST.get('transfer')
-        udate = request.POST.get('date')
-        ucatalog = request.POST.getlist('catalog')
-
-        if (uloc1 == uloc2):
-            w.append('loc1')
-            w.append('loc2')
+        utype = request.POST.get('op')
+        uid = request.session.get('uid')
+        if (utype == '购买'):
+            utrainID = request.POST.get('trainID')
+            uloc1 = request.POST.get('loc1')
+            uloc2 = request.POST.get('loc2')
+            udate = request.POST.get('date')
+            utype = request.POST.get('type')
+            print('command:' + 'buy_ticket' + ' ' + uid + ' ' + '1' + ' ' + utrainID + ' ' + uloc1 + ' ' + uloc2 + ' ' + udate + ' ' + utype + '\n')
+            ret = uclient.post_and_get('buy_ticket' + ' ' + uid + ' ' + '1' + ' ' + utrainID + ' ' + uloc1 + ' ' + uloc2 + ' ' + udate + ' ' + utype + '\n')
+            return render(request, 'train.html', c)
         else:
-            if (not inputchecker.locChecker(uloc1)):
+            uloc1 = request.POST.get('loc1')
+            uloc2 = request.POST.get('loc2')
+            utransfer = request.POST.get('transfer')
+            udate = request.POST.get('date')
+            ucatalog = request.POST.getlist('catalog')
+
+            if (uloc1 == uloc2):
                 w.append('loc1')
-            if (not inputchecker.locChecker(uloc2)):
                 w.append('loc2')
-        if (utransfer == 'on' and not request.session.get('uid')):
-            w.append('loginbutton')
-            w.append('registerbutton')
-        if (not inputchecker.dateChecker(udate)):
-            w.append('date')
-        uucatalog = ''
-        for i in ucatalog:
-            uucatalog = uucatalog + i
-        if (not inputchecker.catalogChecker(uucatalog)):
-            w.append('catalog')
-        c['message'] = w
-        if (w):
-            return render(request, 'train.html', c)
+            else:
+                if (not inputchecker.locChecker(uloc1)):
+                    w.append('loc1')
+                if (not inputchecker.locChecker(uloc2)):
+                    w.append('loc2')
+            if (utransfer == 'on' and not request.session.get('uid')):
+                w.append('loginbutton')
+                w.append('registerbutton')
+            if (not inputchecker.dateChecker(udate)):
+                w.append('date')
+            uucatalog = ''
+            for i in ucatalog:
+                uucatalog = uucatalog + i
+            if (not inputchecker.catalogChecker(uucatalog)):
+                w.append('catalog')
+            c['message'] = w
+            if (w):
+                return render(request, 'train.html', c)
 
-        #TO DO: show the results / buy
-        c['querydone'] = True
-        if (utransfer == 'on'):
-            print('command:' + 'query_transfer' + ' ' + uloc1 + ' ' + uloc2 + ' ' + udate + ' ' + uucatalog + '\n')
-            ret = uclient.post_and_get('query_transfer' + ' ' + uloc1 + ' ' + uloc2 + ' ' + udate + ' ' + uucatalog + '\n').split('\n')
-            print(ret)
+            c['querydone'] = True
+            if (utransfer == 'on'):
+                print('command:' + 'query_transfer' + ' ' + uloc1 + ' ' + uloc2 + ' ' + udate + ' ' + uucatalog + '\n')
+                ret = uclient.post_and_get('query_transfer' + ' ' + uloc1 + ' ' + uloc2 + ' ' + udate + ' ' + uucatalog + '\n').split('\n')
+            else:
+                print('command:' + 'query_ticket' + ' ' + uloc1 + ' ' + uloc2 + ' ' + udate + ' ' + uucatalog + '\n')
+                ret = uclient.post_and_get('query_ticket' + ' ' + uloc1 + ' ' + uloc2 + ' ' + udate + ' ' + uucatalog + '\n').split('\n')
+            #print(ret)
             table = []
-            for i in ret:
-                utrain = i.split()
-                if (len(utrain) <= 1):
+            tableO = []
+            for i in range(0, len(ret)):
+                utrain = ret[i].split()
+                print(utrain)
+                if (not len(utrain)):
                     continue
                 tmp = {}
                 tmp['trainID'] = utrain[0]
@@ -171,35 +187,20 @@ def trainRender(request):
                 tmp['date2'] = utrain[5]
                 tmp['time2'] = utrain[6]
                 tmp['tleft'] = ''
-                tmp['operation'] = r'<button class="btn-primary btn-md">购买</button>'
+                tmp['operation'] = r'<button type="button" class="btn-primary btn-md" data-toggle="modal" data-id="' + str(i) + r'" data-target="#myModal">购买</button>'
+                tmpO = {}
+                tmpO['type'] = []
+                tmpO['trainID'] = utrain[0]
+                tmpO['loc1'] = utrain[1]
+                tmpO['date'] = utrain[2]
+                tmpO['loc2'] = utrain[4]
                 for i in range(0, (len(utrain) - 6) // 3):
                     tmp['tleft'] += r'<div><b>' + utrain[7 + i * 3] + r'</b>' + '   ¥' + utrain[7 + i * 3 + 2] + '   ' + utrain[7 + i * 3 + 1] + '张' + r'</div>'
+                    tmpO['type'].append(utrain[7 + i * 3])
                 table.append(tmp)
+                tableO.append(tmpO)
             c['table'] = json.dumps(table)
-            return render(request, 'train.html', c)
-        else:
-            print('command:' + 'query_ticket' + ' ' + uloc1 + ' ' + uloc2 + ' ' + udate + ' ' + uucatalog + '\n')
-            ret = uclient.post_and_get('query_ticket' + ' ' + uloc1 + ' ' + uloc2 + ' ' + udate + ' ' + uucatalog + '\n').split('\n')
-            print(ret)
-            table = []
-            for i in ret:
-                utrain = i.split()
-                if (len(utrain) <= 1):
-                    continue
-                tmp = {}
-                tmp['trainID'] = utrain[0]
-                tmp['loc1'] = utrain[1]
-                tmp['date1'] = utrain[2]
-                tmp['time1'] = utrain[3]
-                tmp['loc2'] = utrain[4]
-                tmp['date2'] = utrain[5]
-                tmp['time2'] = utrain[6]
-                tmp['tleft'] = ''
-                tmp['operation'] = r'<button class="btn-primary btn-md">购买</button>'
-                for i in range(0, (len(utrain) - 6) // 3):
-                    tmp['tleft'] += r'<div><b>' + utrain[7 + i * 3] + r'</b>' + '   ¥' + utrain[7 + i * 3 + 2] + '   ' + utrain[7 + i * 3 + 1] + '张' + r'</div>'
-                table.append(tmp)
-            c['table'] = json.dumps(table)
+            c['tableO'] = json.dumps(tableO)
             return render(request, 'train.html', c)
 
     return render(request, 'train.html', c)
@@ -218,46 +219,69 @@ def ticketRender(request):
     c['uprivilege'] = request.session.get('uprivilege')
     
     if (request.method == 'POST'):
+        utype = request.POST.get('op')
         uid = request.session.get('uid')
-        udate = request.POST.get('date')
-        ucatalog = request.POST.getlist('catalog')
-
-        if (not inputchecker.dateChecker(udate)):
-            w.append('date')
-        uucatalog = ''
-        for i in ucatalog:
-            uucatalog = uucatalog + i
-        if (not inputchecker.catalogChecker(uucatalog)):
-            w.append('catalog')
-        c['message'] = w
-        if (w):
+        if (utype == "退票"):
+            utrainID = request.POST.get('trainID')
+            uloc1 = request.POST.get('loc1')
+            uloc2 = request.POST.get('loc2')
+            udate = request.POST.get('date')
+            utype = request.POST.get('type')
+            print('command:' + 'refund_ticket' + ' ' + uid + ' ' + '1' + ' ' + utrainID + ' ' + uloc1 + ' ' + uloc2 + ' ' + udate + ' ' + utype + '\n')
+            ret = uclient.post_and_get('refund_ticket' + ' ' + uid + ' ' + '1' + ' ' + utrainID + ' ' + uloc1 + ' ' + uloc2 + ' ' + udate + ' ' + utype + '\n')
             return render(request, 'ticket.html', c)
-        
-        c['querydone'] = True
-        print('command:' + 'query_order' + ' ' + uid + ' ' + udate + ' ' + uucatalog + '\n')
-        ret = uclient.post_and_get('query_order' + ' ' + uid + ' ' + udate + ' ' + uucatalog + '\n').split('\n')
-        print(ret)
-        table = []
-        for i in ret:
-            utrain = i.split()
-            print(utrain)
-            if (len(utrain) <= 1):
-                continue
-            tmp = {}
-            tmp['trainID'] = utrain[0]
-            tmp['loc1'] = utrain[1]
-            tmp['date1'] = utrain[2]
-            tmp['time1'] = utrain[3]
-            tmp['loc2'] = utrain[4]
-            tmp['date2'] = utrain[5]
-            tmp['time2'] = utrain[6]
-            tmp['tleft'] = ''
-            tmp['operation'] = r'<button type="button" class="btn-primary btn-md" data-toggle="modal" data-target="#myModal">退票</button>'
-            for i in range(0, (len(utrain) - 6) // 3):
-                tmp['tleft'] += r'<div><b>' + utrain[7 + i * 3] + r'</b>' + '   ¥' + utrain[7 + i * 3 + 2] + '   ' + utrain[7 + i * 3 + 1] + '张' + r'</div>'
-            table.append(tmp)
-        c['table'] = json.dumps(table)
-        return render(request, 'ticket.html', c)
+        else:
+            udate = request.POST.get('date')
+            ucatalog = request.POST.getlist('catalog')
+
+            if (not inputchecker.dateChecker(udate)):
+                w.append('date')
+            uucatalog = ''
+            for i in ucatalog:
+                uucatalog = uucatalog + i
+            if (not inputchecker.catalogChecker(uucatalog)):
+                w.append('catalog')
+            c['message'] = w
+            if (w):
+                return render(request, 'ticket.html', c)
+            
+            c['querydone'] = True
+            print('command:' + 'query_order' + ' ' + uid + ' ' + udate + ' ' + uucatalog + '\n')
+            ret = uclient.post_and_get('query_order' + ' ' + uid + ' ' + udate + ' ' + uucatalog + '\n').split('\n')
+            table = []
+            tableO = []
+            print(len(ret))
+            for i in range(1, len(ret)):
+                utrain = ret[i].split()
+                if (not len(utrain)):
+                    continue
+                print(utrain)
+                tmp = {}
+                tmp['trainID'] = utrain[0]
+                tmp['loc1'] = utrain[1]
+                tmp['date1'] = utrain[2]
+                tmp['loc2'] = utrain[4]
+                tmp['date2'] = utrain[5]
+                tmp['time1'] = utrain[3]
+                tmp['time2'] = utrain[6]
+                tmp['tleft'] = ''
+                tmp['operation'] = r'<button type="button" class="btn-primary btn-md" data-toggle="modal" data-id="' + str(i - 1) + r'" data-target="#myModal">退票</button>'
+                tmpO = {}
+                tmpO['type'] = []
+                tmpO['trainID'] = utrain[0]
+                tmpO['loc1'] = utrain[1]
+                tmpO['date'] = utrain[2]
+                tmpO['loc2'] = utrain[4]
+                for i in range(0, (len(utrain) - 6) // 3):
+                    if (int(utrain[7 + i * 3 + 1]) > 0):
+                        tmp['tleft'] += r'<div><b>' + utrain[7 + i * 3] + r'</b>' + '   ¥' + utrain[7 + i * 3 + 2] + '   ' + utrain[7 + i * 3 + 1] + '张' + r'</div>'
+                        tmpO['type'].append(utrain[7 + i * 3])
+                table.append(tmp)
+                tableO.append(tmpO)
+            c['table'] = json.dumps(table)
+            c['tableO'] = json.dumps(tableO)
+
+            return render(request, 'ticket.html', c)
 
     return render(request, 'ticket.html', c)
 

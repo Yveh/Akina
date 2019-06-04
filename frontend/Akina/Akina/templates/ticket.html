@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% block head %}
 <link href="/static/css/ticket.css" rel="stylesheet">
-<script src="/static/js/ticket.js"></script>
 <style type="text/css">
     {% if message %}
         {% for i in message %}
@@ -12,6 +11,29 @@
         {% endfor %}
     {% endif %}
 </style>
+{% if querydone %}
+<script>
+    var jsonStr_ = "{{ tableO }}";
+    var jsonStr = jsonStr_.replace(/\&#34;/g, '\"');
+    var table = JSON.parse(jsonStr)
+    $(document).ready(function(){
+    $('#myModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var id = button.data('id');
+        console.log(table[id]);
+        var modal = $(this);
+        console.log(table[id].type[0])
+        for (i in table[id].type)
+            $('#modalSelect').append("<option>" + table[id].type[i] + "</option>")
+        $('#modalSelect').selectpicker("refresh");
+        $('#trainID').value = table[id].trainID
+        $('#loc1').value = table[id].loc1
+        $('#loc2').value = table[id].loc2
+        $('#date').value = table[id].date
+      })
+})
+</script>
+{% endif %}
 {% endblock %}
 {% block main %}
 <div class="d-flex align-items-center" id="main">
@@ -51,7 +73,7 @@
                 </div>
                 <div class="row">
                     <div class="col">
-                        <input value="Search" class="btn btn-lg btn-primary btn-block" type="submit">
+                        <input name="op" value="搜索车票" class="btn btn-lg btn-primary btn-block" type="submit">
                     </div>
                 </div>
             </form>
@@ -84,10 +106,30 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title">选择票种</h4>
-                    <button type="button" class="close" data-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    
+                    <div class="container">
+                        <form action="" method="POST">
+                            {{ csrf_input }}
+                            <div class="row d-flex align-items-center">
+                                <div class="col">
+                                    <div class="form-group">
+                                        <select name="type" class="selectpicker" id="modalSelect" data-width="100%">
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <input name="op" value="退票" class="btn btn-md btn-primary btn-block" type="submit">
+                                </div>
+                            </div>
+                            <input type="text" name="trainID" id="trainID" hidden>
+                            <input type="text" name="loc1" id="loc1" hidden>
+                            <input type="text" name="loc2" id="loc2" hidden>
+                            <input type="text" name="date" id="date" hidden>
+                        </form>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
