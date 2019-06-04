@@ -58,7 +58,7 @@ def post_and_get(msg):
 
 
 if __name__ == "__main__": # For testing
-    print(post_and_get("hello"))
+    print(post_and_get("秋梨膏"))
 
 
     
