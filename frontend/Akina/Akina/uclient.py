@@ -6,7 +6,7 @@ client_socket   = None
 server_ip       = "127.0.0.1"
 server_port     = 3012
 loaded          = False
-
+token           = "Lily"
 
 def init():
     sys.stderr.write("loading config...")
@@ -17,7 +17,7 @@ def init():
         global server_ip, server_port
         server_ip = config_json["server_ip"]
         server_port = int(config_json["server_port"])
-
+        token = config_json["token"]
         sys.stderr.write("\033[1;32mOK\033[0m\n")
     except:
         sys.stderr.write("\033[1;31mFailed\033[0m, using default config.\n")
@@ -48,8 +48,10 @@ def post_and_get(msg):
         sys.stderr.write("\033[1;31mMessage unsended\033[0m\n")
         return None
     
-    client_socket.send(msg.encode("utf-8"))
+    msg_json = json.dumps({'token' : token, 'msg' : msg})
+    client_socket.send(msg_json.encode("utf-8"))
     ret = client_socket.recv(1048576).decode()
+
     client_end()
 #    except:
 #        sys.stderr.write("\033[1;31mFailed\033[0m an error occured when transmiting.\n")        
@@ -58,7 +60,7 @@ def post_and_get(msg):
 
 
 if __name__ == "__main__": # For testing
-    print(post_and_get("hello"))
+    print(post_and_get("秋梨膏"))
 
 
     

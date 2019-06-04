@@ -1,6 +1,7 @@
 from django.http import HttpResponse 
 from django.shortcuts import render
 from django.shortcuts import redirect
+import hashlib
 import json
 
 from . import uclient
@@ -16,15 +17,24 @@ def loginRender(request):
 
     c = {}
     w = []
+
+    ucaptcha = request.POST.get('captcha')
+    captcha_ans = captcha.get_captcha_ans(request.session.get('captcha_id'))
+    pass_captcha = True
+    if ((not inputchecker.captchaChecker(ucaptcha)) or (ucaptcha != 'baby' and float(ucaptcha) != captcha_ans)):
+        pass_captcha = False
+
+    cap = captcha.generate_captcha()
+    request.session['captcha_id'] = cap[0]
+    c['captcha_html'] = cap[1]
    
     if (request.method == 'POST'):
         if (request.POST.get('type') == '注册'):
             uname = request.POST.get('username')
-            upassword = request.POST.get('password')
+            upassword = hashlib.sha256(request.POST.get('password').encode('utf-8')).hexdigest()[0:19]
+            print(upassword)
             uemail = request.POST.get('email')
             uphone = request.POST.get('phone')
-            ucaptcha = request.POST.get('captcha')
-            captcha_ans = captcha.get_captcha_ans(request.session.get('captcha_id'))
             if (not inputchecker.nameChecker(uname)):
                 w.append('inputUsernameR')
             if (not inputchecker.passwordChecker(upassword)):
@@ -33,15 +43,15 @@ def loginRender(request):
                 w.append('inputEmailR')
             if (not inputchecker.phoneChecker(uphone)):
                 w.append('inputPhoneR')
-            if ((not inputchecker.captchaChecker(ucaptcha)) or (ucaptcha != 'baby' and float(ucaptcha) != captcha_ans)):
+            if (not pass_captcha):
                 w.append('inputCaptchaR')
+
             c['message'] = w
-             
-            cap = captcha.generate_captcha()
-            c['captcha_id'] = cap[0]
-            c['captcha_html'] = cap[1]
    
             if (w):
+                c['show_flag'] = True
+                c['show_color'] = '#FF2D2D'
+                c['show_message'] = '🐓？'
                 c['flag'] = True
                 return render(request, 'login.html', c)
             print('command:' + 'register' + ' ' + uname + ' ' + upassword + ' ' + uemail + ' ' + uphone + '\n')
@@ -66,7 +76,8 @@ def loginRender(request):
             return render(request, 'login.html', c)
         elif (request.POST.get('type') == '登录'):
             uid = request.POST.get('id')
-            upassword = request.POST.get('password')
+            upassword = hashlib.sha256(request.POST.get('password').encode('utf-8')).hexdigest()[0:19]
+            print(upassword)
 
             if (not inputchecker.idChecker(uid)):
                 w.append('inputId')
@@ -100,9 +111,6 @@ def loginRender(request):
                 request.session['upassword'] = upassword
                 return redirect('/train/')
     else:
-        cap = captcha.generate_captcha()
-        request.session['captcha_id'] = cap[0]
-        c['captcha_html'] = cap[1]
         print(request.GET)
         c['flag'] = request.GET.get('flag')
         return render(request, 'login.html', c)
