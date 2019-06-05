@@ -5,8 +5,3 @@
 body {
     height: 100vh;
 }
-
-.box-transparent {
-    box-shadow: 0px 0px 8px black;
-    background: hsla(0, 0%, 100%, 0);
-}

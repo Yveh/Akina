@@ -427,6 +427,9 @@ def cleanRender(request):
 
 def baseRender(request):
     return render(request, 'base.html')
+    
+def aboutusRender(request):
+    return render(request, 'aboutus.html')
 
 def addtrainRender(request):
     if (not request.session.get('uid')):

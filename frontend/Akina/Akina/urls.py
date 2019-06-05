@@ -30,4 +30,5 @@ urlpatterns = [
     path(r'clean/', view.cleanRender),
     path(r'base/', view.baseRender),
     path(r'addtrain/', view.addtrainRender),
+    path(r'aboutus/', view.aboutusRender),
 ]

@@ -31,5 +31,5 @@ def catalogChecker(x):
     return stringChecker(x) and len(x) < 10 and re.match(r"^(?!.*?([CDGKOTZ]).*?\1.*?$)[CDGKOTZ]+$", x) != None
 
 def trainIdChecker(x):
-    return stringChecker(x) and len(x) < 20 and re.match(r"^[cdgkotz]+\S+$", x) != None
+    return stringChecker(x) and len(x) < 20 and re.match(r"^\S+$", x) != None
 
