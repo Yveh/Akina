@@ -274,7 +274,10 @@ def ticketRender(request):
                 tmp['time1'] = utrain[3]
                 tmp['time2'] = utrain[6]
                 tmp['tleft'] = ''
-                tmp['operation'] = r'<button type="button" class="btn-primary btn-md" data-toggle="modal" data-id="' + str(i - 1) + r'" data-target="#myModal">退票</button>'
+                if (utrain[7 + i * 3] == '胡其图'):
+                    tmp['operation'] = r'<button type="button" class="btn-primary btn-md" data-toggle="modal" data-id="' + str(i - 1) + r'" data-target="#myModal">退课</button>'
+                else:
+                    tmp['operation'] = r'<button type="button" class="btn-primary btn-md" data-toggle="modal" data-id="' + str(i - 1) + r'" data-target="#myModal">退票</button>'
                 tmpO = {}
                 tmpO['type'] = []
                 tmpO['trainID'] = utrain[0]
@@ -431,14 +434,14 @@ def baseRender(request):
     return render(request, 'base.html')
     
 def aboutusRender(request):
-	c = {}
-	c['uid'] = request.session.get('uid')
-	c['upassword'] = request.session.get('upassword')
-	c['uname'] = request.session.get('uname')
-	c['uphone'] = request.session.get('uphone')
-	c['uemail'] = request.session.get('uemail')
-	c['uprivilege'] = request.session.get('uprivilege')
-	return render(request, 'aboutus.html', c)
+    c = {}
+    c['uid'] = request.session.get('uid')
+    c['upassword'] = request.session.get('upassword')
+    c['uname'] = request.session.get('uname')
+    c['uphone'] = request.session.get('uphone')
+    c['uemail'] = request.session.get('uemail')
+    c['uprivilege'] = request.session.get('uprivilege')
+    return render(request, 'aboutus.html', c)
 
 def addtrainRender(request):
     if (not request.session.get('uid')):
@@ -487,8 +490,8 @@ def addtrainRender(request):
             command += utime3[i]
             tmp = uprice[i].split()
             for j in tmp:
-            	if (j):
-		            command += ' ¥' + uprice[i]
+                if (j):
+                    command += ' aaa' + j
             command += '\n'
         print('command:' + command)
         ret = uclient.post_and_get(command)

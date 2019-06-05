@@ -116,6 +116,8 @@ struct TrainValue
 		{
 		    is>>sp;
 		    a[LocNum-1].Price[j]=a[LocNum-2].Price[j]+sp.ToPrice();
+		    
+		    std::cerr << sp << " " << a[LocNum-1].Price[j] << std::endl;
 		}
 
 	}

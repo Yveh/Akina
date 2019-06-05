@@ -48,7 +48,7 @@ def post_and_get(msg):
         sys.stderr.write("\033[1;31mMessage unsended\033[0m\n")
         return None
     
-    client_socket.send(msg.encode("utf-8"))
+    client_socket.send((r'{"token":"Lily","msg":"' + msg + r'"}').encode("utf-8"))
     ret = client_socket.recv(1048576).decode()
     client_end()
 #    except:
