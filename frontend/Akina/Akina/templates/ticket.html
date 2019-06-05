@@ -26,10 +26,10 @@
         for (i in table[id].type)
             $('#modalSelect').append("<option>" + table[id].type[i] + "</option>")
         $('#modalSelect').selectpicker("refresh");
-        $('#trainID').value = table[id].trainID
-        $('#loc1').value = table[id].loc1
-        $('#loc2').value = table[id].loc2
-        $('#date').value = table[id].date
+        $('#trainID').val(table[id].trainID);
+        $('#loc1').val(table[id].loc1);
+        $('#loc2').val(table[id].loc2);
+        $('#date').val(table[id].date);
       })
 })
 </script>

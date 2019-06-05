@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% block head %}
 <link href="/static/css/addtrain.css" rel="stylesheet">
-<script src="/static/js/addtrain.js"></script>
 <style type="text/css">
     {% if message %}
         {% for i in message %}
@@ -53,7 +52,7 @@ $(document).ready(function(){
                     </div>
                     <div class="col-4">
                         <div class="form-group">
-                            <select name="catalog" class="selectpicker" multiple data-actions-box="true" title="Choose train types" data-width="100%" id="catalog">
+                            <select name="catalog" class="selectpicker" title="Choose train types" data-width="100%" id="catalog">
                                 <option>C</option>
                                 <option>D</option>
                                 <option>G</option>

@@ -138,8 +138,10 @@ def trainRender(request):
             uloc2 = request.POST.get('loc2')
             udate = request.POST.get('date')
             utype = request.POST.get('type')
+            print('udate=', udate)
             print('command:' + 'buy_ticket' + ' ' + uid + ' ' + '1' + ' ' + utrainID + ' ' + uloc1 + ' ' + uloc2 + ' ' + udate + ' ' + utype + '\n')
             ret = uclient.post_and_get('buy_ticket' + ' ' + uid + ' ' + '1' + ' ' + utrainID + ' ' + uloc1 + ' ' + uloc2 + ' ' + udate + ' ' + utype + '\n')
+            print(ret)
             return render(request, 'train.html', c)
         else:
             uloc1 = request.POST.get('loc1')
@@ -183,7 +185,7 @@ def trainRender(request):
             for i in range(0, len(ret)):
                 utrain = ret[i].split()
                 print(utrain)
-                if (not len(utrain)):
+                if (len(utrain) < 2):
                     continue
                 tmp = {}
                 tmp['trainID'] = utrain[0]
@@ -194,7 +196,7 @@ def trainRender(request):
                 tmp['date2'] = utrain[5]
                 tmp['time2'] = utrain[6]
                 tmp['tleft'] = ''
-                tmp['operation'] = r'<button type="button" class="btn-primary btn-md" data-toggle="modal" data-id="' + str(i) + r'" data-target="#myModal">购买</button>'
+                tmp['operation'] = r'<button type="button" class="btn-primary btn-md" data-toggle="modal" data-id="' + str(i - 1) + r'" data-target="#myModal">购买</button>'
                 tmpO = {}
                 tmpO['type'] = []
                 tmpO['trainID'] = utrain[0]
@@ -260,7 +262,7 @@ def ticketRender(request):
             print(len(ret))
             for i in range(1, len(ret)):
                 utrain = ret[i].split()
-                if (not len(utrain)):
+                if (len(utrain) < 2):
                     continue
                 print(utrain)
                 tmp = {}
@@ -336,7 +338,7 @@ def manageRender(request):
             table = []
             for i in range(1, len(ret)):
                 tmp = ret[i].split()
-                if (not len(tmp)):
+                if (len(tmp) < 2):
                     continue
                 qwq = {}
                 qwq['loc1'] = tmp[0]
