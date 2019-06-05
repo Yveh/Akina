@@ -1,7 +1,7 @@
 import random
 
 def generate_captcha():
-    x = (random.randint(1, 99), random.randint(1, 99), random.randint(1, 99))
+    x = (random.randint(1, 5) * 2, random.randint(1, 5), random.randint(1, 5))
     return (x, '$\\int_0^{{ {0} }} {1} x + {2} \\, dx$'.format(str(x[0]), str(x[1]), str(x[2])))
 
 def get_captcha_ans(x):

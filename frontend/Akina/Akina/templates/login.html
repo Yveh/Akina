@@ -1,4 +1,8 @@
 <!DOCTYPE html>
+
+{% extends "base.html" %}
+{% block head %}
+
 <html lang="en">
 
 <head>
@@ -29,8 +33,9 @@
         {% endif %}
     </style>
 </head>
-
-<body>
+{% endblock %}
+{% block main %}
+<div class="container" style="margin-top: 6rem">
     <div id="cover" class="d-flex align-items-center">
         <div class="container">
             <div class="row justify-content-center">
@@ -160,6 +165,7 @@
             </div>
         </div>
     </div>
-</body>
+</div>
 
-</html>
+{% endblock %}
+
