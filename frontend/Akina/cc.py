@@ -3,12 +3,13 @@ import socket
 import json
 
 client_socket   = None
-server_ip       = "127.0.0.1"
-server_port     = 3012
+server_ip       = "59.78.38.198"
+server_port     = 3334
 loaded          = False
 
 
 def init():
+    '''
     sys.stderr.write("loading config...")
     try:
         config = open("config.json", 'r')
@@ -21,7 +22,7 @@ def init():
         sys.stderr.write("\033[1;32mOK\033[0m\n")
     except:
         sys.stderr.write("\033[1;31mFailed\033[0m, using default config.\n")
-
+'''
 def client_start():
     sys.stderr.write("Connecting : " + server_ip + ":" + str(server_port) + '...')
     global client_socket
