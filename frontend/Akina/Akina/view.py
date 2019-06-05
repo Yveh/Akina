@@ -130,6 +130,7 @@ def trainRender(request):
     c['uprivilege'] = request.session.get('uprivilege')
 
     if (request.method == 'POST'):
+        print(request.POST)
         utype = request.POST.get('op')
         uid = request.session.get('uid')
         if (utype == '购买'):
@@ -196,7 +197,10 @@ def trainRender(request):
                 tmp['date2'] = utrain[5]
                 tmp['time2'] = utrain[6]
                 tmp['tleft'] = ''
-                tmp['operation'] = r'<button type="button" class="btn-primary btn-md" data-toggle="modal" data-id="' + str(i - 1) + r'" data-target="#myModal">购买</button>'
+                if (utransfer == 'on'):
+                    tmp['operation'] = r'<button type="button" class="btn-primary btn-md" data-toggle="modal" data-id="' + str(i) + r'" data-target="#myModal">购买</button>'
+                else:
+                    tmp['operation'] = r'<button type="button" class="btn-primary btn-md" data-toggle="modal" data-id="' + str(i - 1) + r'" data-target="#myModal">购买</button>'
                 tmpO = {}
                 tmpO['type'] = []
                 tmpO['trainID'] = utrain[0]
@@ -323,13 +327,19 @@ def manageRender(request):
             print('command:' + 'sale_train' + ' ' + uid + '\n')
             ret = uclient.post_and_get('sale_train' + ' ' + uid + '\n')
             print(ret)
+            if (ret != '1\n'):
+                w.append('id')
+                c['message'] = w
             return render(request, 'manage.html', c)
         elif (uop == '搜索车次'):
-            c['querydone'] = True
             print('command:' + 'query_train' + ' ' + uid + '\n')
             ret = uclient.post_and_get('query_train' + ' ' + uid + '\n').split('\n')
             print(ret)
-
+            if (len(ret) <= 2):
+                w.append('id')
+                c['message'] = w
+                return render(request, 'manage.html', c)
+            c['querydone'] = True
             tmp = ret[0].split()
             c['trainID'] = tmp[0]
             c['name'] = tmp[1]
@@ -379,8 +389,8 @@ def personRender(request):
         uname = request.POST.get('username')
         if (uname == ''):
             uname = request.session.get('uname')
-        uopassword = request.POST.get('opassword')
-        unpassword = request.POST.get('npassword')
+        uopassword = hashlib.sha256(request.POST.get('opassword').encode('utf-8')).hexdigest()[0:19]
+        unpassword = hashlib.sha256(request.POST.get('npassword').encode('utf-8')).hexdigest()[0:19]
         print(unpassword)
         if (unpassword == ''):
             unpassword = request.session.get('upassword')
@@ -410,7 +420,7 @@ def personRender(request):
             w.append('inputoPassword')
         c['message'] = w
         if (w):
-            return render(request, 'pperson.html', c)
+            return render(request, 'person.html', c)
         print('command:' + 'modify_profile' + ' ' + uid + ' ' + uname + ' ' + unpassword + ' ' + uemail + ' ' + uphone + '\n')
         ret = uclient.post_and_get('modify_profile' + ' ' + uid + ' ' + uname + ' ' + unpassword + ' ' + uemail + ' ' + uphone + '\n')
         request.session['uname'] = uname

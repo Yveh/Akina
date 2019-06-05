@@ -36,14 +36,15 @@ function swapLoc1Loc2() {
     $('#myModal').on('show.bs.modal', function (event) {
         var button = $(event.relatedTarget);
         var id = button.data('id');
+        console.log(table[id].loc1)
         var modal = $(this);
         for (i in table[id].type)
             $('#modalSelect').append("<option>" + table[id].type[i] + "</option>")
         $('#modalSelect').selectpicker("refresh");
         $('#trainID').val(table[id].trainID);
-        $('#loc1').val(table[id].loc1);
-        $('#loc2').val(table[id].loc2);
-        $('#date').val(table[id].date);
+        $('#Mloc1').val(table[id].loc1);
+        $('#Mloc2').val(table[id].loc2);
+        $('#Mdate').val(table[id].date);
       })
 })
 </script>
@@ -155,9 +156,9 @@ function swapLoc1Loc2() {
                                 </div>
                             </div>
                             <input type="text" name="trainID" id="trainID" hidden>
-                            <input type="text" name="loc1" id="loc1" hidden>
-                            <input type="text" name="loc2" id="loc2" hidden>
-                            <input type="text" name="date" id="date" hidden>
+                            <input type="text" name="loc1" id="Mloc1" hidden>
+                            <input type="text" name="loc2" id="Mloc2" hidden>
+                            <input type="text" name="date" id="Mdate" hidden>
                         </form>
                     </div>
                 </div>
