@@ -431,7 +431,14 @@ def baseRender(request):
     return render(request, 'base.html')
     
 def aboutusRender(request):
-    return render(request, 'aboutus.html')
+	c = {}
+	c['uid'] = request.session.get('uid')
+	c['upassword'] = request.session.get('upassword')
+	c['uname'] = request.session.get('uname')
+	c['uphone'] = request.session.get('uphone')
+	c['uemail'] = request.session.get('uemail')
+	c['uprivilege'] = request.session.get('uprivilege')
+	return render(request, 'aboutus.html', c)
 
 def addtrainRender(request):
     if (not request.session.get('uid')):
@@ -477,7 +484,12 @@ def addtrainRender(request):
                 command += 'xx:xx '
             else:
                 command += utime2[i] + ' '
-            command += utime3[i] + ' ¥' + uprice[i] + '\n'
+            command += utime3[i]
+            tmp = uprice[i].split()
+            for j in tmp:
+            	if (j):
+		            command += ' ¥' + uprice[i]
+            command += '\n'
         print('command:' + command)
         ret = uclient.post_and_get(command)
         print(ret)
