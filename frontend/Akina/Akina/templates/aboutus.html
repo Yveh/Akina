@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block head %}
+<head>
+    <link href="/static/css/aboutus.css" rel="stylesheet">
+</head>
+{% endblock %}
+{% block main %}
+    <div class="container" style="margin-top: 6rem">
+		<div class="d-flex align-items-center justify-content-center" id="cover">
+		    <div class="container py-4 px-4" id="fafa">
+		        <div class="row">
+		            <div class="col">
+		                <div class="text-center" id="title">Akina</div>
+		                <div class="text-center" id="subtitle">ver. -1</div>
+		            </div>
+		            <div class="col">
+		                <div class="text-center" id="author">Yveh</div>
+		                <div class="text-center" id="author">ColorlessX</div>
+		                <div class="text-center" id="author">ReFraction334</div>
+		                <div class="text-center" id="author">fstqwq</div>
+		            </div>
+		        </div>
+		        <hr>
+		        <div class="row">
+		            <div class="col">
+		            	<div class="text-center emoji">🐓</div>
+		            </div>
+		            <div class="col">
+		                <div class="text-center emoji">🐴</div>
+		            </div>
+		        </div>
+		        
+		        <div class="row">
+		        	<div class="col">
+		        		<div>
+		        			<iframe src="http://player.bilibili.com/player.html?aid=48788630&cid=85436034&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" width=500 height=282 allowfullscreen="true"> </iframe>
+		        		</div>
+		        	</div>
+		        	 <div class="col">
+				            <script type="text/javascript" src="http://ctld.sjtu.edu.cn/sites/all/libraries/jwplayer/jwplayer.js"></script><div id="jwplayer_container">装载视频中...</div>
+							<script type="text/javascript">
+								jwplayer("jwplayer_container").setup({
+								flashplayer: "http://ctld.sjtu.edu.cn/sites/all/libraries/jwplayer/player.swf",
+								file: "http://ctld.sjtu.edu.cn/sites/default/files/teachingex/20161107hqt.flv",
+								image: "http://ctld.sjtu.edu.cn/sites/default/files/teachingex/20161107_1hqt.jpg",
+								width: 500,
+								height: 282
+								});
+							</script>
+				    </div>
+		        </div>
+		        
+		    </div>
+		</div>
+	</div>
+{% endblock%}

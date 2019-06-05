@@ -1,0 +1,17 @@
+#title {
+    text-shadow: #FF0000 0 0 10px;
+    color: #FFFFFF;
+    font-size: 4rem;
+    font-weight: bold;
+    font-family: topcoder, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    -webkit-box-reflect: below -13px -webkit-linear-gradient(transparent, transparent 50%, rgba(255, 255, 255, .5));
+}
+
+#author {
+    text-shadow: #FF0000 0 0 10px;
+    color: #FFFFFF;
+    font-size: 2rem;
+    font-weight: bold;
+    font-family: topcoder, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    -webkit-box-reflect: below -13px -webkit-linear-gradient(transparent, transparent 50%, rgba(255, 255, 255, .5));
+}
