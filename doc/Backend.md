@@ -139,7 +139,9 @@ Key 为B+树的键值类型（所有可以成为排序依据的键的联合键�
 ### 缓存池类
 
 缓存池类BufferPool是BPlusTree类的一个内嵌类，运用LRU思想，存储最近使用的B+树节点。
+运用一个map和priority_queue实现，map以结点在外存地址的编号为key，存储节点；priority_queue维护一个时间戳与编号的联合值，当超出大小限制后将时间戳最小的编号的节点出队，同时删除map中的节点。
 
+缓存池类BufferPool是BPlusTree类的一个内嵌类，运用LRU思想，存储最近使用的B+树节点。
 #### 接口说明
 
 - 构造函数
