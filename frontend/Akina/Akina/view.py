@@ -8,6 +8,9 @@ from . import uclient
 from . import inputchecker
 from . import captcha
 
+def page_not_foundRender(request):
+    return render(request, '404.html')
+
 def startRender(request):
     return render(request, 'start.html')
 

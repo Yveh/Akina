@@ -14,7 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, re_path
 
 from . import view
 from . import captcha
@@ -31,4 +31,5 @@ urlpatterns = [
     path(r'base/', view.baseRender),
     path(r'addtrain/', view.addtrainRender),
     path(r'aboutus/', view.aboutusRender),
+    re_path(r'^', view.page_not_foundRender),
 ]
