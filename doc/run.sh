@@ -1,2 +1,2 @@
-sudo pip3 install django
-sudo pip3 install jinja2
+sudo apt-get install python3 python3-pip
+sudo pip3 install django jinja2
