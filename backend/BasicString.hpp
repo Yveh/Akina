@@ -40,6 +40,7 @@ public:
 	inline unsigned short ToDate(){return (ch[6]-'6')*30+ch[8]*10+ch[9]-528;}
 	double ToPrice()
 	{
+		std::cerr << ch << std::endl;
 		double x=0,f=1;
 		for (int i=3;ch[i]!='\0';i++)
 		{

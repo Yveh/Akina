@@ -93,7 +93,9 @@ struct TrainValue
 		is>>Name>>Catalog>>LocNum>>KindNum;
 		a=new station[LocNum];
 		for (int i=0;i<KindNum;i++) is>>TicketKind[i];
-		is>>a[0].Loc>>sp>>s1>>sp;a[0].Time2=a[0].Time1=s1.ToTime();
+		is>>a[0].Loc>>sp>>s1;is>>sp;
+		std::cerr << "sp : " << sp << std::endl;
+a[0].Time2=a[0].Time1=s1.ToTime();
 		for (int j=0;j<KindNum;j++) is>>sp,a[0].Price[j]=sp.ToPrice();
 		for (int i=1;i<LocNum-1;i++)
 		{

@@ -500,7 +500,7 @@ def addtrainRender(request):
                 command += 'xx:xx '
             else:
                 command += utime2[i] + ' '
-            command += utime3[i]
+            command += 'xx:xx'
             tmp = uprice[i].split()
             for j in tmp:
                 if (j):
